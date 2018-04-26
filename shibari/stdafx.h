@@ -17,3 +17,19 @@
 #include <cstdint>
 
 using namespace std;
+
+#ifndef _M_X64
+  #ifdef _DEBUG
+    #pragma comment(lib,"..\\..\\enma_pe\\Debug\\enma_pe.lib")
+  #else
+	#pragma comment(lib,"..\\..\\enma_pe\\Release\\enma_pe.lib")
+  #endif
+#else
+  #ifdef _DEBUG
+	#pragma comment(lib,"..\\..\\enma_pe\\x64\\Debug\\enma_pe.lib")
+  #else
+	#pragma comment(lib,"..\\..\\enma_pe\\x64\\Release\\enma_pe.lib")
+  #endif
+#endif
+
+#include "enma_pe.h"

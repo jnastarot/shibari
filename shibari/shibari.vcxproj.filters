@@ -13,15 +13,48 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Заголовочные файлы\shibari_module_builder">
+      <UniqueIdentifier>{a64d25b2-b918-40ad-94e2-111b6ff507b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\shibari_module_linker">
+      <UniqueIdentifier>{c83fd5ec-2584-4dee-8359-16e638201d05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\shibari_module_module">
+      <UniqueIdentifier>{b2738130-1fd3-450e-afcf-4f3526dc879e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="shibari_builder.h">
+      <Filter>Заголовочные файлы\shibari_module_builder</Filter>
+    </ClInclude>
+    <ClInclude Include="shibari_module.h">
+      <Filter>Заголовочные файлы\shibari_module_module</Filter>
+    </ClInclude>
+    <ClInclude Include="shibari_linker.h">
+      <Filter>Заголовочные файлы\shibari_module_linker</Filter>
+    </ClInclude>
+    <ClInclude Include="shibari.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Файлы исходного кода</Filter>
+    </ClCompile>
+    <ClCompile Include="shibari_builder.cpp">
+      <Filter>Заголовочные файлы\shibari_module_builder</Filter>
+    </ClCompile>
+    <ClCompile Include="shibari_module.cpp">
+      <Filter>Заголовочные файлы\shibari_module_module</Filter>
+    </ClCompile>
+    <ClCompile Include="shibari_linker.cpp">
+      <Filter>Заголовочные файлы\shibari_module_linker</Filter>
+    </ClCompile>
+    <ClCompile Include="shibari.cpp">
+      <Filter>Заголовочные файлы</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

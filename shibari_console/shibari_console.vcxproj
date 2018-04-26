@@ -22,7 +22,7 @@
     <ProjectGuid>{00D6C615-EA3A-4D90-A09C-24D743918EFF}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>shibari_console</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
