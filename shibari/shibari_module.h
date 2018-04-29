@@ -110,6 +110,8 @@ public:
     bound_import_table&     shibari_module::get_image_bound_imports();
 
 public:
+    pe_image_expanded&                       shibari_module::get_module_expanded();
+
     shibari_module_position&                 shibari_module::get_module_position();
     shibari_module_export&                   shibari_module::get_module_exports();
 

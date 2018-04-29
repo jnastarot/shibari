@@ -147,6 +147,9 @@ bound_import_table&     shibari_module::get_image_bound_imports() {
     return this->module_expanded.bound_imports;
 }
 
+pe_image_expanded&                       shibari_module::get_module_expanded() {
+    return this->module_expanded;
+}
 shibari_module_position&                 shibari_module::get_module_position() {
     return this->module_position;
 }
