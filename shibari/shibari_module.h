@@ -1,7 +1,21 @@
 #pragma once
 
+#define SET_HI_NUMBER(x,num) ((x&0xF000FFFF)|((num&0xFFF)<<16))
+#define SET_LO_NUMBER(x,num) ((x&0xFFFF0000)| (num&0xFFFF))
+
+#define GET_HI_NUMBER(x) ((x&0x0FFF0000)>>16)
+#define GET_LO_NUMBER(x) ((x&0x0000FFFF))
+
+#define SET_RELOCATION_ID_IAT(lib_num,func_num) (((lib_num&0xFFF)<<16)|(func_num&0xFFFF)|relocation_index_iat_address)
+
+enum shibari_module_relocation_index {
+    relocation_index_default = 1,
+    relocation_index_iat_address = 0xF0000000,//((reloc_id&0x0FFF0000)>>16) module id (reloc_id&0x0000FFFF) function id
+};
+
 enum shibari_module_code {
     shibari_module_incorrect,
+    shibari_module_correct,
     shibari_module_initialize_failed,
     shibari_module_initialize_success,
 };
@@ -15,6 +29,11 @@ enum shibari_entry_point {
 struct shibari_module_entry_point {
     shibari_entry_point type;
     uint32_t entry_point_rva;
+};
+
+struct shibari_module_symbol_info {
+    uint32_t symbol_info_rva;
+    uint32_t symbol_info_size;
 };
 
 class shibari_module_position {
@@ -37,7 +56,6 @@ public:
 class shibari_module_export {
     std::vector<std::string>       extended_names;
     std::vector<export_table_item> export_items;
-
 public:
     shibari_module_export::shibari_module_export();
     shibari_module_export::shibari_module_export(const shibari_module_export& module_export);
@@ -67,6 +85,9 @@ class shibari_module{
     shibari_module_export   module_exports;
 
     std::vector<shibari_module_entry_point> module_entrys;
+
+    std::vector<shibari_module_symbol_info> code_symbols;
+    std::vector<shibari_module_symbol_info> data_symbols;
 public:
     shibari_module::shibari_module(pe_image &image);
     shibari_module::shibari_module(const shibari_module &module);
@@ -74,6 +95,7 @@ public:
 
     shibari_module& shibari_module::operator=(const shibari_module& module);
 
+    void shibari_module::set_module_code(shibari_module_code code);
 public:
     pe_image&               shibari_module::get_image();
     export_table&		    shibari_module::get_image_exports();
@@ -90,7 +112,10 @@ public:
 public:
     shibari_module_position&                 shibari_module::get_module_position();
     shibari_module_export&                   shibari_module::get_module_exports();
+
     std::vector<shibari_module_entry_point>& shibari_module::get_module_entrys();
+    std::vector<shibari_module_symbol_info>& shibari_module::get_code_symbols();
+    std::vector<shibari_module_symbol_info>& shibari_module::get_data_symbols();
 
     shibari_module_code shibari_module::get_module_code() const;
 };

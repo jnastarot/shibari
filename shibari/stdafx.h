@@ -33,3 +33,5 @@ using namespace std;
 #endif
 
 #include "enma_pe.h"
+
+#include "shibari.h"

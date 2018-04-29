@@ -82,7 +82,14 @@ std::vector<export_table_item>& shibari_module_export::get_export_items() {
 }
 
 shibari_module::shibari_module(pe_image &image) {
-
+    do_expanded_pe_image(this->module_expanded, image);
+    
+    if (this->module_expanded.code != directory_code::directory_code_success) {
+        this->module_code = shibari_module_code::shibari_module_incorrect;
+    }
+    else {
+        this->module_code = shibari_module_code::shibari_module_correct;
+    }
 }
 shibari_module::shibari_module(const shibari_module &module) {
     this->operator=(module);
@@ -102,6 +109,9 @@ shibari_module& shibari_module::operator=(const shibari_module& module) {
     return *this;
 }
 
+void shibari_module::set_module_code(shibari_module_code code) {
+    this->module_code = code;
+}
 
 pe_image&               shibari_module::get_image() {
     return this->module_expanded.image;
@@ -146,7 +156,12 @@ shibari_module_export&                   shibari_module::get_module_exports() {
 std::vector<shibari_module_entry_point>& shibari_module::get_module_entrys() {
     return this->module_entrys;
 }
-
+std::vector<shibari_module_symbol_info>& shibari_module::get_code_symbols() {
+    return this->code_symbols;
+}
+std::vector<shibari_module_symbol_info>& shibari_module::get_data_symbols() {
+    return this->data_symbols;
+}
 shibari_module_code shibari_module::get_module_code() const {
     return this->module_code;
 }
