@@ -103,10 +103,9 @@ void shibari_builder::build_directories(pe_image_expanded& expanded_image, bool 
 
         bool was_build = false;
 
-        pe_section dir_section;
+        pe_section& dir_section = expanded_image.image.add_section();
         dir_section.set_section_name(std::string(".rdata"));
         dir_section.set_readable(true).set_writeable(true).set_executable(false);
-        expanded_image.image.add_section(dir_section);      
 
         if ((!expanded_image.image.is_x32_image() && expanded_image.exceptions.size())) {
             build_exceptions_table(expanded_image.image, dir_section, expanded_image.exceptions);  //build exceptions
@@ -141,11 +140,10 @@ void shibari_builder::build_directories(pe_image_expanded& expanded_image, bool 
 
 
     if (expanded_image.resources.get_entry_list().size()) {                                        //build resources
-        pe_section rsrc_section;
+        pe_section& rsrc_section = expanded_image.image.add_section();
         rsrc_section.set_section_name(std::string(".rsrc"));
         rsrc_section.set_readable(true).set_writeable(false).set_executable(false);
-        expanded_image.image.add_section(rsrc_section);
-     
+
         build_resources_table(expanded_image.image, rsrc_section, expanded_image.resources);
     }
 }
@@ -266,9 +264,9 @@ void _get_nt_header(pe_image& image, uint32_t header_size, std::vector<uint8_t>&
     nt_header.optional_header.win32_version_value = 0;
 
     nt_header.optional_header.size_of_image = ALIGN_UP(
-        (expanded_image.image.get_sections()[image.get_sections_number() - 1]->get_virtual_address() +
-            expanded_image.image.get_sections()[image.get_sections_number() - 1]->get_virtual_size()),
-        expanded_image.image.get_section_align());
+        (image.get_sections()[image.get_sections_number() - 1]->get_virtual_address() +
+            image.get_sections()[image.get_sections_number() - 1]->get_virtual_size()),
+        image.get_section_align());
 
     nt_header.optional_header.size_of_headers = ALIGN_UP(header_size, image.get_file_align());
 

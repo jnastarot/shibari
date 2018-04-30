@@ -70,7 +70,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)\enma_pe\enma_pe;$(IncludePath)</IncludePath>
+    <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -135,6 +135,12 @@
     <ClInclude Include="shibari.h" />
     <ClInclude Include="shibari_builder.h" />
     <ClInclude Include="shibari_linker.h" />
+    <ClInclude Include="shibari_linker_exceptions.h" />
+    <ClInclude Include="shibari_linker_exports.h" />
+    <ClInclude Include="shibari_linker_imports.h" />
+    <ClInclude Include="shibari_linker_loadconfigs.h" />
+    <ClInclude Include="shibari_linker_relocations.h" />
+    <ClInclude Include="shibari_linker_tls.h" />
     <ClInclude Include="shibari_module.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>

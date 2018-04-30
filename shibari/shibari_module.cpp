@@ -20,10 +20,10 @@ shibari_module_position& shibari_module_position::operator=(const shibari_module
     return *this;
 }
 
-void shibari_module_position::get_current_position(uint32_t position) {
+void shibari_module_position::set_current_position(uint32_t position) {
     this->current_position = position;
 }
-void shibari_module_position::get_address_offset(uint32_t offset) {
+void shibari_module_position::set_address_offset(uint32_t offset) {
     this->address_offset = offset;
 }
 
@@ -82,13 +82,18 @@ std::vector<export_table_item>& shibari_module_export::get_export_items() {
 }
 
 shibari_module::shibari_module(pe_image &image) {
-    do_expanded_pe_image(this->module_expanded, image);
-    
-    if (this->module_expanded.code != directory_code::directory_code_success) {
-        this->module_code = shibari_module_code::shibari_module_incorrect;
+    if (image.get_image_status() == pe_image_status::pe_image_status_ok) {
+        do_expanded_pe_image(this->module_expanded, image);
+
+        if (this->module_expanded.code != directory_code::directory_code_success) {
+            this->module_code = shibari_module_code::shibari_module_incorrect;
+        }
+        else {
+            this->module_code = shibari_module_code::shibari_module_correct;
+        }
     }
     else {
-        this->module_code = shibari_module_code::shibari_module_correct;
+        this->module_code = shibari_module_code::shibari_module_incorrect;
     }
 }
 shibari_module::shibari_module(const shibari_module &module) {

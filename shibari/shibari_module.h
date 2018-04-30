@@ -46,8 +46,8 @@ public:
 
     shibari_module_position& shibari_module_position::operator=(const shibari_module_position& position);
 public:
-    void shibari_module_position::get_current_position(uint32_t position);
-    void shibari_module_position::get_address_offset(uint32_t offset);
+    void shibari_module_position::set_current_position(uint32_t position);
+    void shibari_module_position::set_address_offset(uint32_t offset);
 public:
     uint32_t shibari_module_position::get_current_position() const;
     uint32_t shibari_module_position::get_address_offset() const;
