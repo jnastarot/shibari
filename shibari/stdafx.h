@@ -18,6 +18,7 @@
 
 using namespace std;
 
+
 #ifndef _M_X64
   #ifdef _DEBUG
     #pragma comment(lib,"..\\Debug\\enma_pe.lib")
