@@ -8,7 +8,7 @@ int main(int argc, const char **argv){
     std::vector<shibari_module *> modules;
     std::string out_name = "shibari_result.exe";
 
-
+    
     if (argc < 2) {
         printf("need more parameters !\n");
         system("PAUSE");
