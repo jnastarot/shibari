@@ -14,8 +14,5 @@ Date....: 2018
 e.mail..: jnastarot@yandex.ru
 --------------------------------------------------------------------------------
 ```
-<div align="center">
-    <iframe width="620" height="315"
-        src="https://www.youtube.com/embed/IDmf7O5_S_g">
-    </iframe>
-</div>
+
+[![SHIBARI](http://img.youtube.com/vi/IDmf7O5_S_g/0.jpg)](https://www.youtube.com/watch?v=IDmf7O5_S_g "SHIBARI")
