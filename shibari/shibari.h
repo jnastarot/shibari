@@ -1,6 +1,11 @@
 #pragma once
 #include "..\enma_pe\enma_pe\enma_pe.h"
 
+class shibari_module;
+class shibari_linker;
+class shibari_builder;
+
+
 #include "shibari_module.h"
 #include "shibari_linker.h"
 #include "shibari_builder.h"

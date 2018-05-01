@@ -129,7 +129,7 @@ void shibari_linker::initialize_export_redirect_table(std::vector<export_referen
 }
 
 
-bool shibari_linker::merge_export() {
+bool shibari_linker::merge_exports() {
 
     std::vector<export_references> export_refs;
     if (!get_export_references(export_refs)) { return true; }

@@ -33,8 +33,8 @@ class shibari_linker{
 
     void shibari_linker::merge_sections();
     bool shibari_linker::merge_relocations();
-    bool shibari_linker::merge_import();
-    bool shibari_linker::merge_export();
+    bool shibari_linker::merge_imports();
+    bool shibari_linker::merge_exports();
     bool shibari_linker::merge_tls();
     bool shibari_linker::merge_loadconfig();
     bool shibari_linker::merge_exceptions();

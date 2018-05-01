@@ -9,8 +9,7 @@ int main(int argc, const char **argv){
     std::string out_name = "shibari_result.exe";
 
 
-     //*
-    if (argc < 3) {
+    if (argc < 2) {
         printf("need more parameters !\n");
         system("PAUSE");
         return 0;
@@ -45,13 +44,7 @@ int main(int argc, const char **argv){
             out_name = std::string(argv[arg_idx] + 8);
         }
     }
-    //*/
 
-    /* 
-    modules.push_back(new shibari_module(pe_image(std::string("..\\..\\app for test\\Project1.exe"))));
-    modules.push_back(new shibari_module(pe_image(std::string("..\\..\\app for test\\ice9.dll"))));
-    modules[modules.size() - 1]->get_module_exports().add_name("user32.dll");
-    // */
 
     shi.set_main_module(modules[0]);
     for (unsigned int module_idx = 1; module_idx < modules.size(); module_idx++) {

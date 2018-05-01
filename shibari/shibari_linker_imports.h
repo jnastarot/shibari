@@ -64,9 +64,11 @@ bool shibari_linker::process_import(pe_image_expanded& expanded_image) {
     pe_section* last_section = expanded_image.image.get_sections()[expanded_image.image.get_sections_number() - 1];
 
     if (last_section->get_virtual_size() > last_section->get_size_of_raw_data()) {
-        last_section->get_section_data().resize(last_section->get_virtual_size());
+        pe_section_io(*last_section, expanded_image.image, enma_io_mode_allow_expand).add_size(
+            last_section->get_virtual_size() - last_section->get_size_of_raw_data()
+        );
     }
-
+    
     last_section->set_executable(true);
 
 
@@ -74,19 +76,23 @@ bool shibari_linker::process_import(pe_image_expanded& expanded_image) {
     for (unsigned int lib_idx = 0; lib_idx < expanded_image.imports.size(); lib_idx++) {
         imported_library& current_lib = expanded_image.imports.get_libraries()[lib_idx];
 
+        pe_image_io iat_io(expanded_image.image, enma_io_mode_allow_expand);
+        pe_image_io iat_wrapper_io(expanded_image.image, enma_io_mode_allow_expand);
+        iat_wrapper_io.seek_to_end();
+
         for (unsigned int func_idx = 0; func_idx < current_lib.size(); func_idx++) {
             imported_func& current_func = current_lib.get_items()[func_idx];
 
             if (expanded_image.image.is_x32_image()) {
-                uint32_t import_wrapper_rva = last_section->get_virtual_address() + last_section->get_size_of_raw_data();
+                uint32_t import_wrapper_rva = iat_wrapper_io.get_image_offset();
                 uint8_t wrapper_stub[] = { 0xFF ,0x25 ,0,0,0,0 };
 
-
+                
 
                 uint32_t iat_reloc = (uint32_t)expanded_image.image.rva_to_va(import_wrapper_rva);
 
 
-                if (pe_image_io(expanded_image.image, enma_io_mode_allow_expand).set_image_offset(current_func.get_iat_rva()).write(
+                if (iat_io.set_image_offset(current_func.get_iat_rva()).write(
                     &iat_reloc, sizeof(iat_reloc)) == enma_io_success) {
                     expanded_image.relocations.add_item(current_func.get_iat_rva(), relocation_index_default);
                 }
@@ -94,14 +100,16 @@ bool shibari_linker::process_import(pe_image_expanded& expanded_image) {
                     return false;
                 }
 
-                last_section->get_section_data().resize(last_section->get_size_of_raw_data() + sizeof(wrapper_stub));
-                memcpy(last_section->get_section_data().data() + last_section->get_size_of_raw_data() - sizeof(wrapper_stub),
-                    wrapper_stub, sizeof(wrapper_stub));
-
-                expanded_image.relocations.add_item(import_wrapper_rva + 2, SET_RELOCATION_ID_IAT(lib_idx, func_idx));
+                if (iat_wrapper_io.write(
+                    wrapper_stub, sizeof(wrapper_stub)) == enma_io_success) {
+                    expanded_image.relocations.add_item(import_wrapper_rva + 2, SET_RELOCATION_ID_IAT(lib_idx, func_idx));
+                }
+                else {
+                    return false;
+                }
             }
             else {
-                uint32_t import_wrapper_rva = last_section->get_virtual_address() + last_section->get_size_of_raw_data();
+                uint32_t import_wrapper_rva = iat_wrapper_io.get_image_offset();
                 uint8_t wrapper_stub[] = {
                     0x50,                       //push rax
                     0x48 ,0xA1 ,0,0,0,0,0,0,0,0,//mov rax,[dq relocate to iat]
@@ -111,8 +119,7 @@ bool shibari_linker::process_import(pe_image_expanded& expanded_image) {
 
                 uint64_t iat_reloc = expanded_image.image.rva_to_va(import_wrapper_rva);
 
-
-                if (pe_image_io(expanded_image.image, enma_io_mode_allow_expand).set_image_offset(current_func.get_iat_rva()).write(
+                if (iat_io.set_image_offset(current_func.get_iat_rva()).write(
                     &iat_reloc, sizeof(iat_reloc)) == enma_io_success) {
                     expanded_image.relocations.add_item(current_func.get_iat_rva(), relocation_index_default);
                 }
@@ -120,11 +127,13 @@ bool shibari_linker::process_import(pe_image_expanded& expanded_image) {
                     return false;
                 }
 
-                last_section->get_section_data().resize(last_section->get_size_of_raw_data() + sizeof(wrapper_stub));
-                memcpy(last_section->get_section_data().data() + last_section->get_size_of_raw_data() - sizeof(wrapper_stub),
-                    wrapper_stub, sizeof(wrapper_stub));
-
-                expanded_image.relocations.add_item(import_wrapper_rva + 3, SET_RELOCATION_ID_IAT(lib_idx, func_idx));
+                if (iat_wrapper_io.write(
+                    wrapper_stub, sizeof(wrapper_stub)) == enma_io_success) {
+                    expanded_image.relocations.add_item(import_wrapper_rva + 3, SET_RELOCATION_ID_IAT(lib_idx, func_idx));
+                }
+                else {
+                    return false;
+                }
             }
         }
     }
@@ -133,7 +142,7 @@ bool shibari_linker::process_import(pe_image_expanded& expanded_image) {
 }
 
 
-bool shibari_linker::merge_import() {
+bool shibari_linker::merge_imports() {
 
     for (auto& module : extended_modules) {
         for (auto & lib : module->get_image_imports().get_libraries()) {

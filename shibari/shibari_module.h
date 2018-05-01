@@ -89,7 +89,8 @@ class shibari_module{
     std::vector<shibari_module_symbol_info> code_symbols;
     std::vector<shibari_module_symbol_info> data_symbols;
 public:
-    shibari_module::shibari_module(pe_image &image);
+    shibari_module::shibari_module(const std::string& path);
+    shibari_module::shibari_module(const pe_image& image);
     shibari_module::shibari_module(const shibari_module &module);
     shibari_module::~shibari_module();
 

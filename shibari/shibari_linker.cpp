@@ -47,13 +47,13 @@ shibari_linker_errors shibari_linker::link_modules() {
 
     merge_sections();
 
-    if (!merge_import()) {
+    if (!merge_imports()) {
         return shibari_linker_errors::shibari_linker_error_import_linking;
     }
     if (!merge_relocations()) {
         return shibari_linker_errors::shibari_linker_error_relocation_linking;
     }
-    if (!merge_export()) {
+    if (!merge_exports()) {
         return shibari_linker_errors::shibari_linker_error_export_linking;
     }
     if (!merge_tls()) {
@@ -189,7 +189,21 @@ void shibari_linker::merge_module_data() {
             }         
         }
 
-        
+
+        for (auto& code_symbol : module_->get_code_symbols()) {
+            main_module->get_code_symbols().push_back({
+                code_symbol.symbol_info_rva + module_->get_module_position().get_address_offset() ,
+                code_symbol.symbol_info_size
+            });
+        }
+
+        for (auto& data_symbol : module_->get_data_symbols()) {
+            main_module->get_data_symbols().push_back({
+                data_symbol.symbol_info_rva + module_->get_module_position().get_address_offset() ,
+                data_symbol.symbol_info_size
+            });
+        }
+
         if (module_->get_image().get_characteristics()&IMAGE_FILE_DLL) {
             main_module->get_module_entrys().push_back({ shibari_entry_point_dll,
                 module_->get_module_position().get_address_offset() + module_->get_image().get_entry_point()

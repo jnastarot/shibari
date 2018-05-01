@@ -81,7 +81,9 @@ std::vector<export_table_item>& shibari_module_export::get_export_items() {
     return this->export_items;
 }
 
-shibari_module::shibari_module(pe_image &image) {
+
+shibari_module::shibari_module(const pe_image& image) {
+
     if (image.get_image_status() == pe_image_status::pe_image_status_ok) {
         do_expanded_pe_image(this->module_expanded, image);
 
@@ -95,6 +97,10 @@ shibari_module::shibari_module(pe_image &image) {
     else {
         this->module_code = shibari_module_code::shibari_module_incorrect;
     }
+}
+
+shibari_module::shibari_module(const std::string& path) {
+    this->operator=(shibari_module(pe_image(path)));
 }
 shibari_module::shibari_module(const shibari_module &module) {
     this->operator=(module);
