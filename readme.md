@@ -15,4 +15,4 @@ e.mail..: jnastarot@yandex.ru
 --------------------------------------------------------------------------------
 ```
 
-[![SHIBARI](http://img.youtube.com/vi/IDmf7O5_S_g/0.jpg)](https://www.youtube.com/watch?v=IDmf7O5_S_g "SHIBARI")
+[![shibari project video](http://img.youtube.com/vi/IDmf7O5_S_g/0.jpg)](https://www.youtube.com/watch?v=IDmf7O5_S_g "shibari project video")
