@@ -81,6 +81,9 @@ std::vector<export_table_item>& shibari_module_export::get_export_items() {
     return this->export_items;
 }
 
+shibari_module::shibari_module() {
+    this->module_code = shibari_module_code::shibari_module_incorrect;
+}
 
 shibari_module::shibari_module(const pe_image& image) {
 
