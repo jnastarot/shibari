@@ -19,18 +19,6 @@
 using namespace std;
 
 
-#ifndef _M_X64
-  #ifdef _DEBUG
-    #pragma comment(lib,"..\\Debug\\enma_pe.lib")
-  #else
-	#pragma comment(lib,"..\\Release\\enma_pe.lib")
-  #endif
-#else
-  #ifdef _DEBUG
-	#pragma comment(lib,"..\\x64\\Debug\\enma_pe.lib")
-  #else
-	#pragma comment(lib,"..\\x64\\Release\\enma_pe.lib")
-  #endif
-#endif
-
+#pragma comment(lib,"enma_pe.lib")
+#include "enma_pe\enma_pe\enma_pe.h"
 #include "shibari.h"

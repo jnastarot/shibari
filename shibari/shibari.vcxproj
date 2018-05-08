@@ -70,7 +70,20 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(SolutionDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(SolutionDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>$(SolutionDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -84,7 +97,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <ProjectReference>
-      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -125,6 +138,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -136,12 +150,6 @@
     <ClInclude Include="shibari.h" />
     <ClInclude Include="shibari_builder.h" />
     <ClInclude Include="shibari_linker.h" />
-    <ClInclude Include="shibari_linker_exceptions.h" />
-    <ClInclude Include="shibari_linker_exports.h" />
-    <ClInclude Include="shibari_linker_imports.h" />
-    <ClInclude Include="shibari_linker_loadconfigs.h" />
-    <ClInclude Include="shibari_linker_relocations.h" />
-    <ClInclude Include="shibari_linker_tls.h" />
     <ClInclude Include="shibari_module.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>

@@ -22,9 +22,6 @@
     <Filter Include="Заголовочные файлы\shibari_module">
       <UniqueIdentifier>{b2738130-1fd3-450e-afcf-4f3526dc879e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Заголовочные файлы\shibari_module_linker\linker_directory">
-      <UniqueIdentifier>{cdeaad67-42ab-4286-a94a-9608ded90630}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -41,24 +38,6 @@
     </ClInclude>
     <ClInclude Include="shibari.h">
       <Filter>Заголовочные файлы</Filter>
-    </ClInclude>
-    <ClInclude Include="shibari_linker_relocations.h">
-      <Filter>Заголовочные файлы\shibari_module_linker\linker_directory</Filter>
-    </ClInclude>
-    <ClInclude Include="shibari_linker_tls.h">
-      <Filter>Заголовочные файлы\shibari_module_linker\linker_directory</Filter>
-    </ClInclude>
-    <ClInclude Include="shibari_linker_exports.h">
-      <Filter>Заголовочные файлы\shibari_module_linker\linker_directory</Filter>
-    </ClInclude>
-    <ClInclude Include="shibari_linker_imports.h">
-      <Filter>Заголовочные файлы\shibari_module_linker\linker_directory</Filter>
-    </ClInclude>
-    <ClInclude Include="shibari_linker_exceptions.h">
-      <Filter>Заголовочные файлы\shibari_module_linker\linker_directory</Filter>
-    </ClInclude>
-    <ClInclude Include="shibari_linker_loadconfigs.h">
-      <Filter>Заголовочные файлы\shibari_module_linker\linker_directory</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
