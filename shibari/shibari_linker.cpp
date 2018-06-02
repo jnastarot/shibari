@@ -103,8 +103,8 @@ bool shibari_linker::explore_module(shibari_module * module) {
         }
     }
 
-    if (!process_relocations(module->get_module_expanded())) { return false; }
-    if (!process_import(module->get_module_expanded())) { return false; }
+    if (!process_relocations(module)) { return false; }
+    if (!process_import(module)) { return false; }
 
 
     for (auto& section_ : module->get_image().get_sections()) {
@@ -518,7 +518,7 @@ bool shibari_linker::switch_import_refs(pe_image_expanded& expanded_image, impor
 }
 
 
-bool shibari_linker::process_import(pe_image_expanded& expanded_image) {
+bool shibari_linker::process_import(shibari_module * module) {
 
     //x32 stub
     //jmp dword ptr [dd relocate to iat]
@@ -528,6 +528,8 @@ bool shibari_linker::process_import(pe_image_expanded& expanded_image) {
     //mov rax,[dq relocate to iat]
     //xchg rax,[rsp]
     //ret
+
+    auto& expanded_image = module->get_module_expanded();
 
     pe_section* last_section = expanded_image.image.get_sections()[expanded_image.image.get_sections_number() - 1];
 
@@ -555,7 +557,7 @@ bool shibari_linker::process_import(pe_image_expanded& expanded_image) {
                 uint32_t import_wrapper_rva = iat_wrapper_io.get_image_offset();
                 uint8_t wrapper_stub[] = { 0xFF ,0x25 ,0,0,0,0 };
 
-
+                module->get_code_symbols().push_back({ import_wrapper_rva , sizeof(wrapper_stub) });
 
                 uint32_t iat_reloc = (uint32_t)expanded_image.image.rva_to_va(import_wrapper_rva);
 
@@ -584,6 +586,8 @@ bool shibari_linker::process_import(pe_image_expanded& expanded_image) {
                     0x48 ,0x87 ,4,0x24,         //xchg [rsp],rax
                     0xC3,                       //ret
                 };
+
+                module->get_code_symbols().push_back({ import_wrapper_rva , sizeof(wrapper_stub) });
 
                 uint64_t iat_reloc = expanded_image.image.rva_to_va(import_wrapper_rva);
 
@@ -706,7 +710,9 @@ bool shibari_linker::merge_loadconfig() {
 
     return true;
 }
-bool shibari_linker::process_relocations(pe_image_expanded& expanded_image) {
+bool shibari_linker::process_relocations(shibari_module * module) {
+
+    auto& expanded_image = module->get_module_expanded();
 
     expanded_image.relocations.sort();
     std::vector<relocation_item>& items = expanded_image.relocations.get_items();

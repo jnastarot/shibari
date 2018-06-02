@@ -23,8 +23,8 @@ class shibari_linker{
     shibari_module* main_module;
 
     bool shibari_linker::explore_module(shibari_module * module);
-    bool shibari_linker::process_import(pe_image_expanded& expanded_image);
-    bool shibari_linker::process_relocations(pe_image_expanded& expanded_image);
+    bool shibari_linker::process_import(shibari_module * module);
+    bool shibari_linker::process_relocations(shibari_module * module);
 
     bool shibari_linker::switch_import_refs(pe_image_expanded& expanded_image, import_table& new_import_table);
 
