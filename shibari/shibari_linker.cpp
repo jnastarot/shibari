@@ -541,14 +541,14 @@ bool shibari_linker::process_import(shibari_module * module) {
 
     last_section->set_executable(true);
 
-
+    pe_image_io iat_wrapper_io(expanded_image.image, enma_io_mode_allow_expand);
+    iat_wrapper_io.seek_to_end();
 
     for (unsigned int lib_idx = 0; lib_idx < expanded_image.imports.size(); lib_idx++) {
         imported_library& current_lib = expanded_image.imports.get_libraries()[lib_idx];
 
         pe_image_io iat_io(expanded_image.image, enma_io_mode_allow_expand);
-        pe_image_io iat_wrapper_io(expanded_image.image, enma_io_mode_allow_expand);
-        iat_wrapper_io.seek_to_end();
+        
 
         for (unsigned int func_idx = 0; func_idx < current_lib.size(); func_idx++) {
             imported_func& current_func = current_lib.get_items()[func_idx];
