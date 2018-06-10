@@ -2,19 +2,21 @@
 
 #define WIN32_LEAN_AND_MEAN       
 
+#include <algorithm>
+#include <cstdint>
 #include <vector>
 #include <list>
-#include <string>
-#include <algorithm>
+#include <math.h>
 #include <map>
 #include <set>
 #include <time.h>
 #include <stdio.h>
+#include <string.h>
+#include <string>
 #include <sstream>
-#include <iostream>
-#include <iostream>
 #include <stdarg.h> 
-#include <cstdint>
+#include <iostream>
+#include <iostream>
 
 using namespace std;
 

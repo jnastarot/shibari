@@ -167,6 +167,13 @@ void shibari_linker::merge_sections() {
 
 void shibari_linker::merge_module_data() {
 
+    pe_image_io image_io(this->main_module->get_image(),enma_io_mode::enma_io_mode_allow_expand);
+    pe_section *last_section = this->main_module->get_image().get_last_section();
+    image_io.set_image_offset(
+        last_section->get_virtual_address() +
+        max(last_section->get_virtual_size(), last_section->get_size_of_raw_data())
+    );
+
     for (auto& module_ : extended_modules) {
         shibari_module_export& module_export = module_->get_module_exports();
 
@@ -203,8 +210,7 @@ void shibari_linker::merge_module_data() {
                 module_->get_module_position().get_address_offset() + module_->get_image().get_entry_point()
             });
 
-            //fix it
-            main_module->get_image_tls().set_address_of_index(1);
+
             main_module->get_image_tls().get_callbacks().push_back({ 
                 module_->get_image().get_entry_point() + module_->get_module_position().get_address_offset(), true 
             });
@@ -214,6 +220,59 @@ void shibari_linker::merge_module_data() {
             main_module->get_module_entrys().push_back({ shibari_entry_point_exe,
                 module_->get_module_position().get_address_offset() + module_->get_image().get_entry_point()
             });
+            
+            main_module->get_image_tls().get_callbacks().push_back({
+                image_io.get_image_offset(), true
+            });
+
+            if (this->main_module->get_image().is_x32_image()) {
+
+                uint8_t wrapper_stub[] = {
+                    0x55,                       //push ebp
+                    0x8B,0xEC,                  //mov ebp,esp
+                    0x6A,0x00,                  //push 0
+                    0x6A,0x00,                  //push 0
+                    0x6A,0x00,                  //push 0
+                    0xFF,0x75,0x08,             //push[ebp + 08]
+                    0xB8,0x78,0x56,0x34,0x12,   //mov eax,12345678
+                    0xFF,0xD0,                  //call eax
+                    0x5D,                       //pop ebp
+                    0xC2,0x0C,0x00              //ret 0xC
+                };
+
+                *(uint32_t*)&wrapper_stub[13] = uint32_t(main_module->get_image().get_image_base() +
+                    module_->get_module_position().get_address_offset() + module_->get_image().get_entry_point());
+
+                main_module->get_image_relocations().add_item(image_io.get_image_offset() + 13, 0);
+
+                main_module->get_code_symbols().push_back({
+                    image_io.get_image_offset() , sizeof(wrapper_stub)
+                });
+
+                image_io.write(wrapper_stub, sizeof(wrapper_stub));
+
+            }else{
+
+                uint8_t wrapper_stub[] = {
+                   0x45,0x31,0xC9,              //xor r9d,r9d
+                   0x45,0x31,0xC0,              //xor r8d,r8d
+                   0x31,0xD2,                   //xor edx,edx
+                   0xFF,0x25,0x00,0x00,0x00,    //jmp qword ptr [$+5] ---||
+                                                                  //     ||
+                   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00   //   <-//
+                };
+
+                *(uint64_t*)&wrapper_stub[13] = main_module->get_image().get_image_base() +
+                    module_->get_module_position().get_address_offset() + module_->get_image().get_entry_point();
+
+                main_module->get_image_relocations().add_item(image_io.get_image_offset() + 13, 0);
+
+                main_module->get_code_symbols().push_back({
+                    image_io.get_image_offset() , sizeof(wrapper_stub)
+                });
+
+                image_io.write(wrapper_stub, sizeof(wrapper_stub));
+            }
         }      
     }
 }
@@ -307,8 +366,6 @@ bool shibari_linker::get_export_references(std::vector<export_references>& expor
                                 }
                             }
                         }
-
-                    next_main_import_item:;
                     }
                     if (!import_lib.get_items().size()) { //delete import lib if its empty
                         imports.get_libraries().erase(imports.get_libraries().begin() + import_lib_idx);
@@ -328,7 +385,7 @@ void shibari_linker::initialize_export_redirect_table(std::vector<export_referen
 
 
     pe_section *table_section = main_module->get_image().get_section_by_idx(
-        main_module->get_image().get_sections_number() - 1
+        uint32_t(main_module->get_image().get_sections_number()) - 1
     );//get last section
 
     uint32_t redirect_table_rva = table_section->get_virtual_address() + table_section->get_virtual_size();
@@ -710,6 +767,7 @@ bool shibari_linker::merge_loadconfig() {
 
     return true;
 }
+
 bool shibari_linker::process_relocations(shibari_module * module) {
 
     auto& expanded_image = module->get_module_expanded();

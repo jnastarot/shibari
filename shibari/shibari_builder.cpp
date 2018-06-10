@@ -6,10 +6,10 @@ shibari_builder::shibari_builder(shibari_module& module, bool build_relocations,
 
     out_image = get_start_header(module.get_image());
 
-    uint32_t image_intro_size = out_image.size();
+    size_t   image_intro_size = out_image.size();
     uint32_t nt_header_size = (module.get_image().is_x32_image() ? sizeof(image_nt_headers32) : sizeof(image_nt_headers64));
 
-    uint32_t first_section_pointer = align_sections(module.get_image(), image_intro_size + nt_header_size);
+    uint32_t first_section_pointer = align_sections(module.get_image(), uint32_t(image_intro_size + nt_header_size));
 
     build_directories(module.get_module_expanded(), build_relocations);
 
@@ -37,9 +37,9 @@ shibari_builder::shibari_builder(shibari_module& module, bool build_relocations,
 
 
     out_image.resize(first_section_pointer +
-        module.get_image().get_section_by_idx(module.get_image().get_sections_number() - 1)->get_pointer_to_raw() +
+        module.get_image().get_section_by_idx(uint32_t(module.get_image().get_sections_number()) - 1)->get_pointer_to_raw() +
         ALIGN_UP(
-            module.get_image().get_section_by_idx(module.get_image().get_sections_number() - 1)->get_size_of_raw_data()
+            module.get_image().get_section_by_idx(uint32_t(module.get_image().get_sections_number()) - 1)->get_size_of_raw_data()
             , module.get_image().get_file_align()));
 
     for (auto& section_ : module.get_image().get_sections()) {
@@ -173,7 +173,7 @@ std::vector<uint8_t> shibari_builder::get_start_header(pe_image& image) {
     if (image.get_rich_data().is_present()) {
         std::vector<uint32_t> rich_stub;
 
-        uint32_t image_start_size = image_start.size();
+        size_t image_start_size = image_start.size();
 
         rich_stub.resize(4 +
             (image.get_rich_data().get_items().size() * 2) +
@@ -190,7 +190,7 @@ std::vector<uint8_t> shibari_builder::get_start_header(pe_image& image) {
         }
         rich_dw[4 + (image.get_rich_data().get_items().size() * 2)] = 0x68636952;//Rich
 
-        uint32_t rich_hash = image_start.size();
+        uint32_t rich_hash = uint32_t(image_start.size());
 
         for (unsigned int i = 0; i < image_start.size(); i++) { //dos header + stub
             if (i >= 0x3C && i < 0x40) { continue; }//skip e_lfanew
@@ -211,7 +211,7 @@ std::vector<uint8_t> shibari_builder::get_start_header(pe_image& image) {
         memcpy(&image_start.data()[image_start_size], rich_stub.data(), rich_stub.size() * sizeof(uint32_t));
     }
 
-    pimage_dos_header(image_start.data())->e_lfanew = image_start.size();
+    pimage_dos_header(image_start.data())->e_lfanew = uint32_t(image_start.size());
 
     return image_start;
 }
@@ -296,7 +296,7 @@ void _get_nt_header(pe_image& image, uint32_t header_size, std::vector<uint8_t>&
 uint32_t    shibari_builder::align_sections(pe_image& image,uint32_t start_header_size) {
 
     uint32_t first_section_raw = ALIGN_UP((start_header_size +
-        (sizeof(image_section_header) * image.get_sections_number())),
+        (sizeof(image_section_header) * uint32_t(image.get_sections_number()))),
         image.get_file_align());
 
     uint32_t current_section_raw = first_section_raw;
