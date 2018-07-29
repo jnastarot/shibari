@@ -2,34 +2,35 @@
 #include "shibari_builder.h"
 
 
-shibari_builder::shibari_builder(shibari_module& module, bool build_relocations, std::vector<uint8_t>& out_image){
+shibari_builder::shibari_builder(const shibari_module& module, bool build_relocations, std::vector<uint8_t>& out_image)
+:_module(_module){
 
-    out_image = get_start_header(module.get_image());
+    out_image = get_start_header();
 
     size_t   image_intro_size = out_image.size();
-    uint32_t nt_header_size = (module.get_image().is_x32_image() ? sizeof(image_nt_headers32) : sizeof(image_nt_headers64));
+    uint32_t nt_header_size = (_module.get_image().is_x32_image() ? sizeof(image_nt_headers32) : sizeof(image_nt_headers64));
 
-    uint32_t first_section_pointer = align_sections(module.get_image(), uint32_t(image_intro_size + nt_header_size));
+    uint32_t first_section_pointer = align_sections(uint32_t(image_intro_size + nt_header_size));
 
-    build_directories(module.get_module_expanded(), build_relocations);
+    build_directories(build_relocations);
 
     out_image.resize(first_section_pointer);
 
     std::vector<uint8_t> nt_header;
-    get_nt_header(module.get_image(), first_section_pointer, nt_header);
+    get_nt_header(first_section_pointer, nt_header);
     memcpy(&out_image.data()[image_intro_size], nt_header.data(), nt_header.size());
 
-    for (unsigned int section_idx = 0; section_idx < module.get_image().get_sections_number(); section_idx++) {
+    for (unsigned int section_idx = 0; section_idx < _module.get_image().get_sections_number(); section_idx++) {
         image_section_header section_hdr = { 0 };
 
-        memcpy(section_hdr.name, module.get_image().get_section_by_idx(section_idx)->get_section_name().c_str(),
-            min(module.get_image().get_section_by_idx(section_idx)->get_section_name().length(), 8));
+        memcpy(section_hdr.name, _module.get_image().get_section_by_idx(section_idx)->get_section_name().c_str(),
+            min(_module.get_image().get_section_by_idx(section_idx)->get_section_name().length(), 8));
 
-        section_hdr.virtual_size        = module.get_image().get_section_by_idx(section_idx)->get_virtual_size();
-        section_hdr.virtual_address     = module.get_image().get_section_by_idx(section_idx)->get_virtual_address();
-        section_hdr.size_of_raw_data    = module.get_image().get_section_by_idx(section_idx)->get_size_of_raw_data();
-        section_hdr.pointer_to_raw_data = module.get_image().get_section_by_idx(section_idx)->get_pointer_to_raw();
-        section_hdr.characteristics     = module.get_image().get_section_by_idx(section_idx)->get_characteristics();
+        section_hdr.virtual_size        = _module.get_image().get_section_by_idx(section_idx)->get_virtual_size();
+        section_hdr.virtual_address     = _module.get_image().get_section_by_idx(section_idx)->get_virtual_address();
+        section_hdr.size_of_raw_data    = _module.get_image().get_section_by_idx(section_idx)->get_size_of_raw_data();
+        section_hdr.pointer_to_raw_data = _module.get_image().get_section_by_idx(section_idx)->get_pointer_to_raw();
+        section_hdr.characteristics     = _module.get_image().get_section_by_idx(section_idx)->get_characteristics();
 
         memcpy(&out_image.data()[image_intro_size + nt_header_size + (sizeof(image_section_header) * section_idx)],
             &section_hdr, sizeof(image_section_header));
@@ -37,12 +38,12 @@ shibari_builder::shibari_builder(shibari_module& module, bool build_relocations,
 
 
     out_image.resize(first_section_pointer +
-        module.get_image().get_section_by_idx(uint32_t(module.get_image().get_sections_number()) - 1)->get_pointer_to_raw() +
+        _module.get_image().get_section_by_idx(uint32_t(_module.get_image().get_sections_number()) - 1)->get_pointer_to_raw() +
         ALIGN_UP(
-            module.get_image().get_section_by_idx(uint32_t(module.get_image().get_sections_number()) - 1)->get_size_of_raw_data()
-            , module.get_image().get_file_align()));
+            _module.get_image().get_section_by_idx(uint32_t(_module.get_image().get_sections_number()) - 1)->get_size_of_raw_data()
+            , _module.get_image().get_file_align()));
 
-    for (auto& section_ : module.get_image().get_sections()) {
+    for (auto& section_ : _module.get_image().get_sections()) {
         memcpy(&out_image.data()[section_->get_pointer_to_raw()],
             section_->get_section_data().data(), section_->get_size_of_raw_data());
     }
@@ -58,7 +59,9 @@ shibari_builder::~shibari_builder()
 
 
 
-void shibari_builder::process_relocations(pe_image_expanded& expanded_image) {
+void shibari_builder::process_relocations() {
+
+    pe_image_expanded& expanded_image = _module.get_module_expanded();
 
     for (auto& reloc_item : expanded_image.relocations.get_items()) {
 
@@ -90,7 +93,9 @@ void shibari_builder::process_relocations(pe_image_expanded& expanded_image) {
 }
 
 
-void shibari_builder::build_directories(pe_image_expanded& expanded_image, bool build_relocations) {
+void shibari_builder::build_directories(bool build_relocations) {
+    
+    pe_image_expanded& expanded_image = _module.get_module_expanded();
 
     if (expanded_image.imports.size() ||
         expanded_image.exports.get_number_of_functions() ||
@@ -128,7 +133,7 @@ void shibari_builder::build_directories(pe_image_expanded& expanded_image, bool 
             was_build = true;
         }
         if (expanded_image.relocations.size()) {                                                   //build relocations
-            process_relocations(expanded_image);
+            process_relocations();
 
             if (build_relocations) {
                 build_relocation_table(expanded_image.image, dir_section, expanded_image.relocations);
@@ -149,8 +154,10 @@ void shibari_builder::build_directories(pe_image_expanded& expanded_image, bool 
 }
 
 
-std::vector<uint8_t> shibari_builder::get_start_header(pe_image& image) {
+std::vector<uint8_t> shibari_builder::get_start_header() {
 #define GET_RICH_HASH(x,i) (((x) << (i)) | ((x) >> (32 - (i))))
+
+    pe_image& image = _module.get_image();
 
     std::vector<uint8_t> image_start;
 
@@ -293,7 +300,9 @@ void _get_nt_header(pe_image& image, uint32_t header_size, std::vector<uint8_t>&
 }
 
 
-uint32_t    shibari_builder::align_sections(pe_image& image,uint32_t start_header_size) {
+uint32_t    shibari_builder::align_sections(uint32_t start_header_size) {
+
+    pe_image& image = _module.get_image();
 
     uint32_t first_section_raw = ALIGN_UP((start_header_size +
         (sizeof(image_section_header) * uint32_t(image.get_sections_number()))),
@@ -313,7 +322,9 @@ uint32_t    shibari_builder::align_sections(pe_image& image,uint32_t start_heade
     return first_section_raw;
 }
 
-void shibari_builder::get_nt_header(pe_image& image, uint32_t header_size, std::vector<uint8_t>& header) {
+void shibari_builder::get_nt_header(uint32_t header_size, std::vector<uint8_t>& header) {
+
+    pe_image& image = _module.get_image();
 
     if (image.is_x32_image()) {
         _get_nt_header<image_32>(image, header_size, header);
