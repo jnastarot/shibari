@@ -3,7 +3,7 @@
 
 
 shibari_builder::shibari_builder(const shibari_module& module, bool build_relocations, std::vector<uint8_t>& out_image)
-:_module(_module){
+:_module(module){
 
     out_image = get_start_header();
 
