@@ -10,9 +10,10 @@ shibari_builder::shibari_builder(const shibari_module& module, bool build_reloca
     size_t   image_intro_size = out_image.size();
     uint32_t nt_header_size = (_module.get_image().is_x32_image() ? sizeof(image_nt_headers32) : sizeof(image_nt_headers64));
 
-    uint32_t first_section_pointer = align_sections(uint32_t(image_intro_size + nt_header_size));
-
+    align_sections(uint32_t(image_intro_size + nt_header_size));
     build_directories(build_relocations);
+
+    uint32_t first_section_pointer = align_sections(uint32_t(image_intro_size + nt_header_size));
 
     out_image.resize(first_section_pointer);
 
