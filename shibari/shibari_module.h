@@ -16,8 +16,8 @@ enum shibari_module_relocation_index {
 enum shibari_module_code {
     shibari_module_incorrect,
     shibari_module_correct,
-    shibari_module_initialize_failed,
-    shibari_module_initialize_success,
+    shibari_module_initialization_failed,
+    shibari_module_initialization_success,
 };
 
 enum shibari_entry_point {

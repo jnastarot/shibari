@@ -149,15 +149,29 @@
   <ItemGroup>
     <ClInclude Include="shibari.h" />
     <ClInclude Include="shibari_builder.h" />
+    <ClInclude Include="shibari_data_linker.h" />
+    <ClInclude Include="shibari_exceptions_linker.h" />
+    <ClInclude Include="shibari_export_linker.h" />
+    <ClInclude Include="shibari_import_linker.h" />
     <ClInclude Include="shibari_linker.h" />
+    <ClInclude Include="shibari_loadconfigs_linker.h" />
     <ClInclude Include="shibari_module.h" />
+    <ClInclude Include="shibari_relocations_linker.h" />
+    <ClInclude Include="shibari_tls_linker.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="shibari.cpp" />
     <ClCompile Include="shibari_builder.cpp" />
+    <ClCompile Include="shibari_data_linker.cpp" />
+    <ClCompile Include="shibari_exceptions_linker.cpp" />
+    <ClCompile Include="shibari_export_linker.cpp" />
+    <ClCompile Include="shibari_import_linker.cpp" />
     <ClCompile Include="shibari_linker.cpp" />
+    <ClCompile Include="shibari_loadconfigs_linker.cpp" />
     <ClCompile Include="shibari_module.cpp" />
+    <ClCompile Include="shibari_relocations_linker.cpp" />
+    <ClCompile Include="shibari_tls_linker.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

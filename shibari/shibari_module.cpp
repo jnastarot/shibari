@@ -88,7 +88,7 @@ shibari_module::shibari_module() {
 shibari_module::shibari_module(const pe_image& image) {
 
     if (image.get_image_status() == pe_image_status::pe_image_status_ok) {
-        do_expanded_pe_image(this->module_expanded, image);
+        get_expanded_pe_image(this->module_expanded, image);
 
         if (this->module_expanded.code != directory_code::directory_code_success) {
             this->module_code = shibari_module_code::shibari_module_incorrect;

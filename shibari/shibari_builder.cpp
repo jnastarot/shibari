@@ -2,67 +2,73 @@
 #include "shibari_builder.h"
 
 
-shibari_builder::shibari_builder(const shibari_module& module, bool build_relocations, std::vector<uint8_t>& out_image)
-:_module(module){
+shibari_builder::shibari_builder(const shibari_module& _target_module, bool build_relocations, std::vector<uint8_t>& out_image)
+:target_module(_target_module){
 
-    out_image = get_start_header();
+    uint32_t dos_headers_size;
+    uint32_t nt_headers_size;
+    uint32_t headers_size;
 
-    size_t   image_intro_size = out_image.size();
-    uint32_t nt_header_size = (_module.get_image().is_x32_image() ? sizeof(image_nt_headers32) : sizeof(image_nt_headers64));
+    out_image = get_dos_headers(dos_headers_size);
+    nt_headers_size = dos_headers_size + (target_module.get_image().is_x32_image() ? sizeof(image_nt_headers32) : sizeof(image_nt_headers64));
+    headers_size = calculate_headers_size(dos_headers_size, build_relocations);
+    
+    out_image.resize(headers_size);
 
-    align_sections(uint32_t(image_intro_size + nt_header_size));
+    align_sections(headers_size);
+
     build_directories(build_relocations);
 
-    uint32_t first_section_pointer = align_sections(uint32_t(image_intro_size + nt_header_size));
-
-    out_image.resize(first_section_pointer);
-
-    std::vector<uint8_t> nt_header;
-    get_nt_header(first_section_pointer, nt_header);
-    memcpy(&out_image.data()[image_intro_size], nt_header.data(), nt_header.size());
-
-    for (unsigned int section_idx = 0; section_idx < _module.get_image().get_sections_number(); section_idx++) {
-        image_section_header section_hdr = { 0 };
-
-        memcpy(section_hdr.name, _module.get_image().get_section_by_idx(section_idx)->get_section_name().c_str(),
-            min(_module.get_image().get_section_by_idx(section_idx)->get_section_name().length(), 8));
-
-        section_hdr.virtual_size        = _module.get_image().get_section_by_idx(section_idx)->get_virtual_size();
-        section_hdr.virtual_address     = _module.get_image().get_section_by_idx(section_idx)->get_virtual_address();
-        section_hdr.size_of_raw_data    = _module.get_image().get_section_by_idx(section_idx)->get_size_of_raw_data();
-        section_hdr.pointer_to_raw_data = _module.get_image().get_section_by_idx(section_idx)->get_pointer_to_raw();
-        section_hdr.characteristics     = _module.get_image().get_section_by_idx(section_idx)->get_characteristics();
-
-        memcpy(&out_image.data()[image_intro_size + nt_header_size + (sizeof(image_section_header) * section_idx)],
-            &section_hdr, sizeof(image_section_header));
+    {
+        std::vector<uint8_t> nt_header;
+        get_nt_header(headers_size, nt_header);
+        memcpy(&out_image.data()[dos_headers_size], nt_header.data(), nt_header.size());
     }
 
+    if (target_module.get_image().get_sections_number()) {
+        {
+            uint8_t * p_sections_header = &out_image.data()[nt_headers_size];
 
-    out_image.resize(first_section_pointer +
-        _module.get_image().get_section_by_idx(uint32_t(_module.get_image().get_sections_number()) - 1)->get_pointer_to_raw() +
-        ALIGN_UP(
-            _module.get_image().get_section_by_idx(uint32_t(_module.get_image().get_sections_number()) - 1)->get_size_of_raw_data()
-            , _module.get_image().get_file_align()));
+            for (unsigned int section_idx = 0; section_idx < target_module.get_image().get_sections_number(); section_idx++) {
+                image_section_header section_hdr = { 0 };
 
-    for (auto& section_ : _module.get_image().get_sections()) {
-        memcpy(&out_image.data()[section_->get_pointer_to_raw()],
-            section_->get_section_data().data(), section_->get_size_of_raw_data());
+                memcpy(section_hdr.name, target_module.get_image().get_section_by_idx(section_idx)->get_section_name().c_str(),
+                    min(target_module.get_image().get_section_by_idx(section_idx)->get_section_name().length(), 8));
+
+                section_hdr.virtual_size = target_module.get_image().get_section_by_idx(section_idx)->get_virtual_size();
+                section_hdr.virtual_address = target_module.get_image().get_section_by_idx(section_idx)->get_virtual_address();
+                section_hdr.size_of_raw_data = target_module.get_image().get_section_by_idx(section_idx)->get_size_of_raw_data();
+                section_hdr.pointer_to_raw_data = target_module.get_image().get_section_by_idx(section_idx)->get_pointer_to_raw();
+                section_hdr.characteristics = target_module.get_image().get_section_by_idx(section_idx)->get_characteristics();
+
+                memcpy(p_sections_header, &section_hdr, sizeof(image_section_header));
+
+                p_sections_header += sizeof(image_section_header);
+            }
+        }
+
+
+        out_image.resize(headers_size +
+            target_module.get_image().get_section_by_idx(uint32_t(target_module.get_image().get_sections_number()) - 1)->get_pointer_to_raw() +
+            ALIGN_UP(
+                target_module.get_image().get_section_by_idx(uint32_t(target_module.get_image().get_sections_number()) - 1)->get_size_of_raw_data()
+                , target_module.get_image().get_file_align()));
+
+        for (auto& section_ : target_module.get_image().get_sections()) { //write sections data
+            memcpy(&out_image.data()[section_->get_pointer_to_raw()], section_->get_section_data().data(), section_->get_size_of_raw_data());
+        }
     }
 
-    *(uint32_t*)&out_image.data()[image_intro_size + offsetof(image_nt_headers32, optional_header.checksum)] =
-        calculate_checksum(out_image);
+    *(uint32_t*)&out_image.data()[dos_headers_size + offsetof(image_nt_headers32, optional_header.checksum)] = calculate_checksum(out_image);
 }
 
 
-shibari_builder::~shibari_builder()
-{
-}
-
+shibari_builder::~shibari_builder() {}
 
 
 void shibari_builder::process_relocations() {
 
-    pe_image_expanded& expanded_image = _module.get_module_expanded();
+    pe_image_expanded& expanded_image = target_module.get_module_expanded();
 
     for (auto& reloc_item : expanded_image.relocations.get_items()) {
 
@@ -94,133 +100,96 @@ void shibari_builder::process_relocations() {
 }
 
 
-void shibari_builder::build_directories(bool build_relocations) {
-    
-    pe_image_expanded& expanded_image = _module.get_module_expanded();
-
-    if (expanded_image.imports.size() ||
-        expanded_image.exports.get_number_of_functions() ||
-        expanded_image.relocations.size() ||
-        expanded_image.exceptions.size() ||
-        (expanded_image.tls.get_address_of_index() || expanded_image.tls.get_callbacks().size()) ||
-        (!expanded_image.image.is_x32_image() && expanded_image.exceptions.get_items().size()) ||
-        (!expanded_image.load_config.get_size())
-        ) {
-
-        bool was_build = false;
-
-        pe_section& dir_section = expanded_image.image.add_section();
-        dir_section.set_section_name(std::string(".rdata"));
-        dir_section.set_readable(true).set_writeable(true).set_executable(false);
-
-        if ((!expanded_image.image.is_x32_image() && expanded_image.exceptions.size())) {
-            build_exceptions_table(expanded_image.image, dir_section, expanded_image.exceptions);  //build exceptions
-            was_build = true;
-        }
-        if (expanded_image.exports.get_number_of_functions()) {                                    //build export
-            build_export_table(expanded_image.image, dir_section, expanded_image.exports);
-            was_build = true;
-        }
-        if (expanded_image.imports.size()) {                                                        //build import
-            build_import_table_full(expanded_image.image, dir_section, expanded_image.imports);
-            was_build = true;
-        }
-        if (expanded_image.tls.get_address_of_index() || expanded_image.tls.get_callbacks().size()) { //build tls
-            build_tls_full(expanded_image.image, dir_section, expanded_image.tls, expanded_image.relocations);
-            was_build = true;
-        }
-        if (!expanded_image.load_config.get_size()) {                                              //build load config
-            build_load_config_table_full(expanded_image.image, dir_section, expanded_image.load_config, expanded_image.relocations);
-            was_build = true;
-        }
-        if (expanded_image.relocations.size()) {                                                   //build relocations
-            process_relocations();
-
-            if (build_relocations) {
-                build_relocation_table(expanded_image.image, dir_section, expanded_image.relocations);
-                was_build = true;
-            }
-        }
-    }
-
-
-
-    if (expanded_image.resources.get_entry_list().size()) {                                        //build resources
-        pe_section& rsrc_section = expanded_image.image.add_section();
-        rsrc_section.set_section_name(std::string(".rsrc"));
-        rsrc_section.set_readable(true).set_writeable(false).set_executable(false);
-
-        build_resources_table(expanded_image.image, rsrc_section, expanded_image.resources);
-    }
-}
-
-
-std::vector<uint8_t> shibari_builder::get_start_header() {
+std::vector<uint8_t> shibari_builder::get_dos_headers(uint32_t& headers_size) {
 #define GET_RICH_HASH(x,i) (((x) << (i)) | ((x) >> (32 - (i))))
 
-    pe_image& image = _module.get_image();
+    pe_image& image = target_module.get_image();
 
     std::vector<uint8_t> image_start;
 
-    if (image.get_dos_stub().get_stub().size()) {
-        image_start.resize(sizeof(image_dos_header) + image.get_dos_stub().get_stub().size());
-        memcpy(image_start.data(), &image.get_dos_header().get_header(), sizeof(image_dos_header));
-        memcpy(&image_start.data()[sizeof(image_dos_header)], image.get_dos_stub().get_stub().data()
-            , image.get_dos_stub().get_stub().size());
-    }
-    else {
+     
+    {   //add dos header
+
+        image_dos_header dos_header;
+        image.get_dos_header(dos_header);
+
+        if (dos_header.e_magic != IMAGE_DOS_SIGNATURE) {
+            dos_header.e_magic = IMAGE_DOS_SIGNATURE;
+        }
+
         image_start.resize(sizeof(image_dos_header));
-        memset(image_start.data(),0, sizeof(image_dos_header));
-        image_dos_header* dos_header = (image_dos_header*)image_start.data();
-        dos_header->e_magic = IMAGE_DOS_SIGNATURE;
 
-        //todo 
+
+        memcpy(image_start.data(), &dos_header, sizeof(image_dos_header));  //write dos header
     }
 
 
-    if (image.get_rich_data().is_present()) {
-        std::vector<uint32_t> rich_stub;
+    {   //add dos stub
 
-        size_t image_start_size = image_start.size();
+        pe_dos_stub dos_header;
+        
+        if (get_image_dos_stub(image.get_headers_data(), dos_header)) {
+            auto& dos_stub = dos_header.get_stub();
 
-        rich_stub.resize(4 +
-            (image.get_rich_data().get_items().size() * 2) +
-            4
-        );
+            image_start.resize(sizeof(image_dos_header) + dos_stub.size());
 
-        uint32_t * rich_dw = rich_stub.data();
-
-        rich_dw[0] = 0x536E6144; //DanS
-        for (unsigned int item_idx = 0; item_idx < image.get_rich_data().get_items().size(); item_idx++) {
-            rich_dw[4 + (item_idx * 2)] = (image.get_rich_data().get_items()[item_idx].get_compiler_build() & 0xFFFF) |
-                ((image.get_rich_data().get_items()[item_idx].get_type() & 0xFFFF) << 16);
-            rich_dw[4 + (item_idx * 2) + 1] = image.get_rich_data().get_items()[item_idx].get_count();
-        }
-        rich_dw[4 + (image.get_rich_data().get_items().size() * 2)] = 0x68636952;//Rich
-
-        uint32_t rich_hash = uint32_t(image_start.size());
-
-        for (unsigned int i = 0; i < image_start.size(); i++) { //dos header + stub
-            if (i >= 0x3C && i < 0x40) { continue; }//skip e_lfanew
-
-            rich_hash += GET_RICH_HASH((uint32_t)image_start.data()[i], i);
-        }
-        for (unsigned int i = 0; i < image.get_rich_data().get_items().size(); i++) { //Rich struct
-            rich_hash += GET_RICH_HASH(rich_dw[4 + (i * 2)], rich_dw[4 + (i * 2) + 1]);
+            memcpy(&image_start.data()[sizeof(image_dos_header)], dos_stub.data(), dos_stub.size()); //write dos stub
         }
 
-        for (unsigned int i = 0; i < 4 + (image.get_rich_data().get_items().size() * 2); i++) {
-            rich_dw[i] ^= rich_hash;
-        }
-        rich_dw[4 + (image.get_rich_data().get_items().size() * 2) + 1] = rich_hash;//Rich hash
-
-
-        image_start.resize(image_start.size() + ((image.get_rich_data().get_items().size() * 2) + 8) * sizeof(uint32_t));
-        memcpy(&image_start.data()[image_start_size], rich_stub.data(), rich_stub.size() * sizeof(uint32_t));
     }
 
+
+    {   //add rich data
+
+        pe_rich_data rich_data;
+        if (get_image_rich_data(image.get_headers_data(), rich_data)) {
+
+            std::vector<uint32_t> rich_stub;
+
+            size_t image_start_size = image_start.size();
+
+            rich_stub.resize(4 + (rich_data.get_items().size() * 2) + 4 ); /* DanS sign size + size of item + Rich sign size */
+
+            uint32_t * rich_dw = rich_stub.data();
+
+            rich_dw[0] = 0x536E6144; //start DanS sign
+
+            for (unsigned int item_idx = 0; item_idx < rich_data.get_items().size(); item_idx++) {      //init rich items    
+                rich_dw[4 + (item_idx * 2)] = (rich_data.get_items()[item_idx].get_compiler_build() & 0xFFFF) |
+                    ((rich_data.get_items()[item_idx].get_type() & 0xFFFF) << 16);
+                rich_dw[4 + (item_idx * 2) + 1] = rich_data.get_items()[item_idx].get_count();
+            }
+
+            rich_dw[4 + (rich_data.get_items().size() * 2)] = 0x68636952;//end Rich sign
+
+            uint32_t rich_hash = uint32_t(image_start.size());
+
+            for (unsigned int i = 0; i < image_start.size(); i++) {  //calc rich hash (dos header + stub) 
+                if (i >= 0x3C && i < 0x40) { continue; }//skip e_lfanew
+
+                rich_hash += GET_RICH_HASH((uint32_t)image_start.data()[i], i);
+            }
+
+            for (unsigned int i = 0; i < rich_data.get_items().size(); i++) { //calc rich hash (Rich struct)
+                rich_hash += GET_RICH_HASH(rich_dw[4 + (i * 2)], rich_dw[4 + (i * 2) + 1]);
+            }
+
+            for (unsigned int i = 0; i < 4 + (rich_data.get_items().size() * 2); i++) { //crypt rich data by hash
+                rich_dw[i] ^= rich_hash;
+            }
+
+            rich_dw[4 + (rich_data.get_items().size() * 2) + 1] = rich_hash; //set Rich hash
+
+
+            image_start.resize(image_start.size() + rich_stub.size() * sizeof(uint32_t));
+            memcpy(&image_start.data()[image_start_size], rich_stub.data(), rich_stub.size() * sizeof(uint32_t));   //write rich data
+        }
+    }
+
+    image_start.resize(ALIGN_UP(image_start.size(), 0x10)); //align start header size
     pimage_dos_header(image_start.data())->e_lfanew = uint32_t(image_start.size());
 
+    headers_size = image_start.size();
     return image_start;
 }
 
@@ -236,7 +205,7 @@ void _get_nt_header(pe_image& image, uint32_t header_size, std::vector<uint8_t>&
    
     nt_header.file_header.machine = image.get_machine();
     nt_header.file_header.number_of_sections = (uint16_t)image.get_sections_number();
-    nt_header.file_header.time_date_stamp = 0;
+    nt_header.file_header.time_date_stamp = image.get_timestamp();
     nt_header.file_header.pointer_to_symbol_table = 0;
     nt_header.file_header.number_of_symbols = 0;
     nt_header.file_header.size_of_optional_header = sizeof(nt_header.optional_header);
@@ -300,16 +269,62 @@ void _get_nt_header(pe_image& image, uint32_t header_size, std::vector<uint8_t>&
     memcpy(header.data(), &nt_header, sizeof(nt_header));
 }
 
+void shibari_builder::get_nt_header(uint32_t header_size, std::vector<uint8_t>& header) {
 
-uint32_t    shibari_builder::align_sections(uint32_t start_header_size) {
+    pe_image& image = target_module.get_image();
 
-    pe_image& image = _module.get_image();
+    if (image.is_x32_image()) {
+        _get_nt_header<image_32>(image, header_size, header);
+    }
+    else {
+        _get_nt_header<image_64>(image, header_size, header);
+    }
+}
 
-    uint32_t first_section_raw = ALIGN_UP((start_header_size +
-        (sizeof(image_section_header) * uint32_t(image.get_sections_number()))),
-        image.get_file_align());
+uint32_t  shibari_builder::calculate_headers_size(uint32_t dos_headers_size, bool build_relocations) {
+    
+    pe_image_expanded& expanded_image = target_module.get_module_expanded();
 
-    uint32_t current_section_raw = first_section_raw;
+    bool has_resources = expanded_image.resources.get_entry_list().size();
+    bool has_relocations = expanded_image.relocations.size();
+    bool has_another_dirs = expanded_image.imports.size() ||
+        expanded_image.exports.get_number_of_functions() ||
+        expanded_image.exceptions.size() ||
+        (expanded_image.tls.get_address_of_index() || expanded_image.tls.get_callbacks().size()) ||
+        (!expanded_image.image.is_x32_image() && expanded_image.exceptions.get_items().size()) ||
+        (!expanded_image.load_config.get_size());
+
+    uint32_t total_sections = expanded_image.image.get_sections_number();
+
+    if (has_resources) {
+        total_sections++;
+    }
+
+    if (has_relocations && build_relocations) {
+        total_sections++;
+    }
+
+    if (has_another_dirs) {
+        total_sections++;
+    }
+
+   
+
+    return ALIGN_UP(
+        dos_headers_size +  //start headers size
+        (expanded_image.image.is_x32_image() ? sizeof(image_nt_headers32) : sizeof(image_nt_headers64)) + //nt header size
+        total_sections * sizeof(image_section_header) //sections desc size
+
+        , expanded_image.image.get_file_align() //alignment
+    );
+}
+
+
+void shibari_builder::align_sections(uint32_t start_header_size) {
+
+    pe_image& image = target_module.get_image();
+
+    uint32_t current_section_raw = start_header_size;
 
     for (auto & section_ : image.get_sections()) {
         if (section_->get_size_of_raw_data() > section_->get_virtual_size()) {
@@ -319,18 +334,60 @@ uint32_t    shibari_builder::align_sections(uint32_t start_header_size) {
 
         current_section_raw += ALIGN_UP(section_->get_size_of_raw_data(),image.get_file_align());
     }
-
-    return first_section_raw;
 }
 
-void shibari_builder::get_nt_header(uint32_t header_size, std::vector<uint8_t>& header) {
+void shibari_builder::build_directories(bool build_relocations) {
 
-    pe_image& image = _module.get_image();
+    pe_image_expanded& expanded_image = target_module.get_module_expanded();
 
-    if (image.is_x32_image()) {
-        _get_nt_header<image_32>(image, header_size, header);
+    if (expanded_image.imports.size() ||
+        expanded_image.exports.get_number_of_functions() ||
+        expanded_image.relocations.size() ||
+        expanded_image.exceptions.size() ||
+        (expanded_image.tls.get_address_of_index() || expanded_image.tls.get_callbacks().size()) ||
+        (!expanded_image.image.is_x32_image() && expanded_image.exceptions.get_items().size()) ||
+        (!expanded_image.load_config.get_size())
+        ) {
+
+
+        pe_section& dir_section = expanded_image.image.add_section();
+        dir_section.set_section_name(std::string(".rdata"));
+        dir_section.set_readable(true).set_writeable(true).set_executable(false);
+
+        if ((!expanded_image.image.is_x32_image() && expanded_image.exceptions.size())) {
+            build_exceptions_table(expanded_image.image, dir_section, expanded_image.exceptions);  //build exceptions
+        }
+        if (expanded_image.exports.get_number_of_functions()) {                                    //build export
+            build_export_table(expanded_image.image, dir_section, expanded_image.exports);
+        }
+        if (expanded_image.imports.size()) {                                                        //build import
+            build_import_table_full(expanded_image.image, dir_section, expanded_image.imports);
+        }
+        if (expanded_image.tls.get_address_of_index() || expanded_image.tls.get_callbacks().size()) { //build tls
+            build_tls_full(expanded_image.image, dir_section, expanded_image.tls, expanded_image.relocations);
+        }
+        if (!expanded_image.load_config.get_size()) {                                              //build load config
+            build_load_config_table_full(expanded_image.image, dir_section, expanded_image.load_config, expanded_image.relocations);
+        }
     }
-    else {
-        _get_nt_header<image_64>(image, header_size, header);
+
+    if (expanded_image.relocations.size()) {                                                   //build relocations
+        process_relocations();
+
+        if (build_relocations) {
+            pe_section& reloc_section = expanded_image.image.add_section();
+            reloc_section.set_section_name(std::string(".reloc"));
+            reloc_section.set_readable(true).set_writeable(false).set_executable(false);
+
+            build_relocation_table(expanded_image.image, reloc_section, expanded_image.relocations);
+        }
+    }
+
+    if (expanded_image.resources.get_entry_list().size()) {                                        //build resources
+        pe_section& rsrc_section = expanded_image.image.add_section();
+        rsrc_section.set_section_name(std::string(".rsrc"));
+        rsrc_section.set_readable(true).set_writeable(false).set_executable(false);
+
+        build_resources_table(expanded_image.image, rsrc_section, expanded_image.resources);
     }
 }

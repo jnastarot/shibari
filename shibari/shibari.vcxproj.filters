@@ -13,48 +13,114 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Заголовочные файлы\shibari_module_builder">
-      <UniqueIdentifier>{a64d25b2-b918-40ad-94e2-111b6ff507b7}</UniqueIdentifier>
+    <Filter Include="Заголовочные файлы\shibari">
+      <UniqueIdentifier>{a6a96657-6852-4072-8edb-294cb83ec105}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Заголовочные файлы\shibari_module_linker">
-      <UniqueIdentifier>{c83fd5ec-2584-4dee-8359-16e638201d05}</UniqueIdentifier>
+    <Filter Include="Заголовочные файлы\shibari\module">
+      <UniqueIdentifier>{1fd0ff7d-3f98-491b-b54e-c7c76dd381be}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Заголовочные файлы\shibari_module">
-      <UniqueIdentifier>{b2738130-1fd3-450e-afcf-4f3526dc879e}</UniqueIdentifier>
+    <Filter Include="Заголовочные файлы\shibari\builder">
+      <UniqueIdentifier>{89944bb0-0eca-4487-ba40-248fdc1193e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\shibari\linker">
+      <UniqueIdentifier>{8924e9f5-a3f0-41c4-a259-6d3d5a09abcc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\shibari\linker\data">
+      <UniqueIdentifier>{bac26ed6-0f84-494b-a76f-e1bb133adaeb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\shibari\linker\exceptions">
+      <UniqueIdentifier>{36427d0b-b7cf-464d-a46e-e6a91fb543de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\shibari\linker\export">
+      <UniqueIdentifier>{45e09fde-b788-4db4-be2e-2f49fcbb0cad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\shibari\linker\import">
+      <UniqueIdentifier>{9cbec75d-2f51-44d1-b878-dda80e42f804}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\shibari\linker\loadconfigs">
+      <UniqueIdentifier>{a237b9fd-a027-466b-9554-475ab5eef62a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\shibari\linker\relocations">
+      <UniqueIdentifier>{46592ae8-8090-4573-a477-21d6bb61ad74}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\shibari\linker\tls">
+      <UniqueIdentifier>{b6ab1391-ae4f-4beb-8730-8ab414104cc8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
-    <ClInclude Include="shibari_builder.h">
-      <Filter>Заголовочные файлы\shibari_module_builder</Filter>
-    </ClInclude>
-    <ClInclude Include="shibari_module.h">
-      <Filter>Заголовочные файлы\shibari_module</Filter>
-    </ClInclude>
-    <ClInclude Include="shibari_linker.h">
-      <Filter>Заголовочные файлы\shibari_module_linker</Filter>
-    </ClInclude>
     <ClInclude Include="shibari.h">
       <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="shibari_module.h">
+      <Filter>Заголовочные файлы\shibari\module</Filter>
+    </ClInclude>
+    <ClInclude Include="shibari_builder.h">
+      <Filter>Заголовочные файлы\shibari\builder</Filter>
+    </ClInclude>
+    <ClInclude Include="shibari_linker.h">
+      <Filter>Заголовочные файлы\shibari\linker</Filter>
+    </ClInclude>
+    <ClInclude Include="shibari_export_linker.h">
+      <Filter>Заголовочные файлы\shibari\linker\export</Filter>
+    </ClInclude>
+    <ClInclude Include="shibari_import_linker.h">
+      <Filter>Заголовочные файлы\shibari\linker\import</Filter>
+    </ClInclude>
+    <ClInclude Include="shibari_loadconfigs_linker.h">
+      <Filter>Заголовочные файлы\shibari\linker\loadconfigs</Filter>
+    </ClInclude>
+    <ClInclude Include="shibari_exceptions_linker.h">
+      <Filter>Заголовочные файлы\shibari\linker\exceptions</Filter>
+    </ClInclude>
+    <ClInclude Include="shibari_relocations_linker.h">
+      <Filter>Заголовочные файлы\shibari\linker\relocations</Filter>
+    </ClInclude>
+    <ClInclude Include="shibari_tls_linker.h">
+      <Filter>Заголовочные файлы\shibari\linker\tls</Filter>
+    </ClInclude>
+    <ClInclude Include="shibari_data_linker.h">
+      <Filter>Заголовочные файлы\shibari\linker\data</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Файлы исходного кода</Filter>
     </ClCompile>
-    <ClCompile Include="shibari_builder.cpp">
-      <Filter>Заголовочные файлы\shibari_module_builder</Filter>
-    </ClCompile>
-    <ClCompile Include="shibari_module.cpp">
-      <Filter>Заголовочные файлы\shibari_module</Filter>
-    </ClCompile>
-    <ClCompile Include="shibari_linker.cpp">
-      <Filter>Заголовочные файлы\shibari_module_linker</Filter>
-    </ClCompile>
     <ClCompile Include="shibari.cpp">
       <Filter>Заголовочные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="shibari_module.cpp">
+      <Filter>Заголовочные файлы\shibari\module</Filter>
+    </ClCompile>
+    <ClCompile Include="shibari_builder.cpp">
+      <Filter>Заголовочные файлы\shibari\builder</Filter>
+    </ClCompile>
+    <ClCompile Include="shibari_linker.cpp">
+      <Filter>Заголовочные файлы\shibari\linker</Filter>
+    </ClCompile>
+    <ClCompile Include="shibari_export_linker.cpp">
+      <Filter>Заголовочные файлы\shibari\linker\export</Filter>
+    </ClCompile>
+    <ClCompile Include="shibari_import_linker.cpp">
+      <Filter>Заголовочные файлы\shibari\linker\import</Filter>
+    </ClCompile>
+    <ClCompile Include="shibari_loadconfigs_linker.cpp">
+      <Filter>Заголовочные файлы\shibari\linker\loadconfigs</Filter>
+    </ClCompile>
+    <ClCompile Include="shibari_exceptions_linker.cpp">
+      <Filter>Заголовочные файлы\shibari\linker\exceptions</Filter>
+    </ClCompile>
+    <ClCompile Include="shibari_relocations_linker.cpp">
+      <Filter>Заголовочные файлы\shibari\linker\relocations</Filter>
+    </ClCompile>
+    <ClCompile Include="shibari_tls_linker.cpp">
+      <Filter>Заголовочные файлы\shibari\linker\tls</Filter>
+    </ClCompile>
+    <ClCompile Include="shibari_data_linker.cpp">
+      <Filter>Заголовочные файлы\shibari\linker\data</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
