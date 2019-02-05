@@ -40,41 +40,43 @@ class shibari_module_position {
     uint32_t current_position;//where first section is started in main module 
     uint32_t address_offset;//current position - original position
 public:
-    shibari_module_position::shibari_module_position();
-    shibari_module_position::shibari_module_position(const shibari_module_position& position);
-    shibari_module_position::~shibari_module_position();
+    shibari_module_position();
+    shibari_module_position(const shibari_module_position& position);
+    ~shibari_module_position();
 
-    shibari_module_position& shibari_module_position::operator=(const shibari_module_position& position);
+    shibari_module_position& operator=(const shibari_module_position& position);
 public:
-    void shibari_module_position::set_current_position(uint32_t position);
-    void shibari_module_position::set_address_offset(uint32_t offset);
+    void set_current_position(uint32_t position);
+    void set_address_offset(uint32_t offset);
 public:
-    uint32_t shibari_module_position::get_current_position() const;
-    uint32_t shibari_module_position::get_address_offset() const;
+    uint32_t get_current_position() const;
+    uint32_t get_address_offset() const;
 };
 
 class shibari_module_export {
     std::vector<std::string>       extended_names;
     std::vector<export_table_item> export_items;
 public:
-    shibari_module_export::shibari_module_export();
-    shibari_module_export::shibari_module_export(const shibari_module_export& module_export);
-    shibari_module_export::~shibari_module_export();
+    shibari_module_export();
+    shibari_module_export(const shibari_module_export& module_export);
+    ~shibari_module_export();
 
 
-    shibari_module_export& shibari_module_export::operator=(const shibari_module_export& module_export);
+    shibari_module_export& operator=(const shibari_module_export& module_export);
 public:
-    void shibari_module_export::add_name(const std::string& name);
-    void shibari_module_export::add_export(const export_table_item& item);
+    void add_name(const std::string& name);
+    void add_export(const export_table_item& item);
     
-    void shibari_module_export::clear_names();
-    void shibari_module_export::clear_exports();
+    void clear_names();
+    void clear_exports();
 public:
-    size_t shibari_module_export::get_names_number() const;
-    size_t shibari_module_export::get_exports_number() const;
+    size_t get_names_number() const;
+    size_t get_exports_number() const;
 
-    std::vector<std::string>&       shibari_module_export::get_names();
-    std::vector<export_table_item>& shibari_module_export::get_export_items();
+    std::vector<std::string>&       get_names() ;
+    const std::vector<std::string>&       get_names() const;
+    std::vector<export_table_item>& get_export_items();
+    const std::vector<export_table_item>& get_export_items() const;
 };
 
 
@@ -89,38 +91,58 @@ class shibari_module{
     std::vector<shibari_module_symbol_info> code_symbols;
     std::vector<shibari_module_symbol_info> data_symbols;
 public:
-    shibari_module::shibari_module();
-    shibari_module::shibari_module(const std::string& path);
-    shibari_module::shibari_module(const pe_image& image);
-    shibari_module::shibari_module(const shibari_module &module);
-    shibari_module::~shibari_module();
+    shibari_module();
+    shibari_module(const std::string& path);
+    shibari_module(const pe_image& image);
+    shibari_module(const shibari_module &module);
+    ~shibari_module();
 
-    shibari_module& shibari_module::operator=(const shibari_module& module);
+    shibari_module& operator=(const shibari_module& module);
 
-    void shibari_module::set_module_code(shibari_module_code code);
+    void set_module_code(shibari_module_code code);
 public:
-    pe_image&               shibari_module::get_image();
-    export_table&		    shibari_module::get_image_exports();
-    import_table&		    shibari_module::get_image_imports();
-    resource_directory&	    shibari_module::get_image_resources();
-    exceptions_table&	    shibari_module::get_image_exceptions();
-    relocation_table&	    shibari_module::get_image_relocations();
-    debug_table&	        shibari_module::get_image_debug();
-    tls_table&			    shibari_module::get_image_tls();
-    load_config_table&	    shibari_module::get_image_load_config();
-    delay_import_table&     shibari_module::get_image_delay_imports();
-    bound_import_table&     shibari_module::get_image_bound_imports();
+    pe_image&               get_image();
+    export_table&		    get_image_exports();
+    import_table&		    get_image_imports();
+    resource_directory&	    get_image_resources();
+    exceptions_table&	    get_image_exceptions();
+    relocation_table&	    get_image_relocations();
+    debug_table&	        get_image_debug();
+    tls_table&			    get_image_tls();
+    load_config_table&	    get_image_load_config();
+    delay_import_table&     get_image_delay_imports();
+    bound_import_table&     get_image_bound_imports();
+
 
 public:
-    pe_image_expanded&                       shibari_module::get_module_expanded();
+    const pe_image&             get_image() const;
+    const export_table&         get_image_exports() const;
+    const import_table&         get_image_imports() const;
+    const resource_directory&   get_image_resources() const;
+    const exceptions_table&	    get_image_exceptions() const;
+    const relocation_table&	    get_image_relocations() const;
+    const debug_table&	        get_image_debug() const;
+    const tls_table&            get_image_tls() const;
+    const load_config_table&    get_image_load_config() const;
+    const delay_import_table&   get_image_delay_imports() const;
+    const bound_import_table&   get_image_bound_imports() const;
 
-    shibari_module_position&                 shibari_module::get_module_position();
-    shibari_module_export&                   shibari_module::get_module_exports();
+public:
+    pe_image_expanded&                       get_module_expanded();
+    shibari_module_position&                 get_module_position();
+    shibari_module_export&                   get_module_exports();
+    std::vector<shibari_module_entry_point>& get_module_entrys();
+    std::vector<shibari_module_symbol_info>& get_code_symbols();
+    std::vector<shibari_module_symbol_info>& get_data_symbols();
 
-    std::vector<shibari_module_entry_point>& shibari_module::get_module_entrys();
-    std::vector<shibari_module_symbol_info>& shibari_module::get_code_symbols();
-    std::vector<shibari_module_symbol_info>& shibari_module::get_data_symbols();
+public:
+    const pe_image_expanded&                       get_module_expanded() const;
+    const shibari_module_position&                 get_module_position() const;
+    const shibari_module_export&                   get_module_exports() const;
+    const std::vector<shibari_module_entry_point>& get_module_entrys() const;
+    const std::vector<shibari_module_symbol_info>& get_code_symbols() const;
+    const std::vector<shibari_module_symbol_info>& get_data_symbols() const;
 
-    shibari_module_code shibari_module::get_module_code() const;
+    shibari_module_code get_module_code() const;
 };
 

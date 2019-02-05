@@ -14,7 +14,7 @@ public:
 public:
     static bool process_import(shibari_module& target_module);
 
-    static bool shibari_import_linker::switch_import_refs(pe_image_expanded& expanded_image,
+    static bool switch_import_refs(pe_image_expanded& expanded_image,
         import_table& new_import_table);
 
     static bool get_import_func_index(import_table& imports,

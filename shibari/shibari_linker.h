@@ -24,12 +24,12 @@ class shibari_linker{
     std::vector<shibari_module*> extended_modules;
     shibari_module* main_module;
 
-    bool shibari_linker::explore_module(shibari_module * module);
+    bool explore_module(shibari_module * module);
 public:
-    shibari_linker::shibari_linker(std::vector<shibari_module*>& extended_modules,shibari_module* main_module);
-    shibari_linker::~shibari_linker();
+    shibari_linker(std::vector<shibari_module*>& extended_modules,shibari_module* main_module);
+    ~shibari_linker();
 
-    shibari_linker_errors shibari_linker::link_modules();
+    shibari_linker_errors link_modules();
 
 };
 

@@ -41,6 +41,14 @@ std::vector<shibari_module*>& shibari::get_extended_modules() {
     return this->extended_modules;
 }
 
+const std::vector<shibari_module*>& shibari::get_extended_modules() const {
+    return this->extended_modules;
+}
+
 shibari_module* shibari::get_main_module() {
+    return this->main_module;
+}
+
+const shibari_module* shibari::get_main_module() const {
     return this->main_module;
 }

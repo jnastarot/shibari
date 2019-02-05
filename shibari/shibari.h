@@ -14,14 +14,16 @@ class shibari {
     std::vector<shibari_module*> extended_modules;
     shibari_module* main_module;
 public:
-    shibari::shibari();
-    shibari::~shibari();
+    shibari();
+    ~shibari();
 
-    shibari_linker_errors shibari::exec_shibari(std::vector<uint8_t>& out_image);
+    shibari_linker_errors exec_shibari(std::vector<uint8_t>& out_image);
 public:
-    void shibari::set_main_module(shibari_module* module);
-    void shibari::add_extended_module(shibari_module* module);
+    void set_main_module(shibari_module* module);
+    void add_extended_module(shibari_module* module);
 public:
-    std::vector<shibari_module*>& shibari::get_extended_modules();
-    shibari_module* shibari::get_main_module();
+    std::vector<shibari_module*>& get_extended_modules();
+    const std::vector<shibari_module*>& get_extended_modules() const;
+    shibari_module* get_main_module();
+    const shibari_module* get_main_module() const;
 };
