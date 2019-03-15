@@ -96,6 +96,7 @@ shibari_module::shibari_module(const pe_image& image) {
 
     if (image.get_image_status() == pe_image_status::pe_image_status_ok) {
         get_expanded_pe_image(this->module_expanded, image);
+        get_extended_exception_info(this->module_expanded);
 
         if (this->module_expanded.code != directory_code::directory_code_success) {
             this->module_code = shibari_module_code::shibari_module_incorrect;
@@ -116,16 +117,20 @@ shibari_module::shibari_module(const shibari_module &module) {
     this->operator=(module);
 }
 shibari_module::~shibari_module() {
-
+    free_extended_exception_info(this->module_expanded);
 }
 
-shibari_module& shibari_module::operator=(const shibari_module& module) {
+shibari_module& shibari_module::operator=(const shibari_module& _module) {
 
-    this->module_code     = module.module_code;
-    this->module_expanded = module.module_expanded;
-    this->module_position = module.module_position;
-    this->module_exports  = module.module_exports;
-    this->module_entrys   = module.module_entrys;
+    this->module_code     = _module.module_code;
+    this->module_expanded = _module.module_expanded;
+    this->module_position = _module.module_position;
+    this->module_exports  = _module.module_exports;
+    this->module_entrys   = _module.module_entrys;
+
+    if (!_module.get_image().is_x32_image()) {
+        copy_extended_exceptions_info(this->module_expanded, _module.module_expanded);
+    }
 
     return *this;
 }

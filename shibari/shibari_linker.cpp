@@ -94,9 +94,12 @@ bool shibari_linker::explore_module(shibari_module * target_module) {
 
     }
 
+    
 
     pe_directory_placement placement;
     directory_code code = get_directories_placement(target_module->get_image(), placement, &target_module->get_image_bound_imports());
+    get_extended_exception_info_placement(target_module->get_module_expanded(), placement);
+
 
     if (code != directory_code::directory_code_success) { 
         return false; 

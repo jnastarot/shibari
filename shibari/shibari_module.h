@@ -1,12 +1,12 @@
 #pragma once
 
-#define SET_HI_NUMBER(x,num) ((x&0xF000FFFF)|((num&0xFFF)<<16))
-#define SET_LO_NUMBER(x,num) ((x&0xFFFF0000)| (num&0xFFFF))
+#define SET_HI_NUMBER(x,num) (((x)&0xF000FFFF)|(((num)&0xFFF)<<16))
+#define SET_LO_NUMBER(x,num) (((x)&0xFFFF0000)| ((num)&0xFFFF))
 
-#define GET_HI_NUMBER(x) ((x&0x0FFF0000)>>16)
-#define GET_LO_NUMBER(x) ((x&0x0000FFFF))
+#define GET_HI_NUMBER(x) (((x)&0x0FFF0000)>>16)
+#define GET_LO_NUMBER(x) (((x)&0x0000FFFF))
 
-#define SET_RELOCATION_ID_IAT(lib_num,func_num) (((lib_num&0xFFF)<<16)|(func_num&0xFFFF)|relocation_index_iat_address)
+#define SET_RELOCATION_ID_IAT(lib_num,func_num) ((((lib_num)&0xFFF)<<16)|((func_num)&0xFFFF)|relocation_index_iat_address)
 
 enum shibari_module_relocation_index {
     relocation_index_default = 1,

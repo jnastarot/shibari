@@ -8,6 +8,5 @@ public:
 
 public:
     shibari_linker_errors link_modules();
-
 };
 

@@ -5,9 +5,10 @@
 shibari_builder::shibari_builder(const shibari_module& _target_module, bool build_relocations, std::vector<uint8_t>& out_image)
 :target_module(_target_module){
 
-    uint32_t dos_headers_size;
-    uint32_t nt_headers_size;
-    uint32_t headers_size;
+
+    size_t dos_headers_size;
+    size_t nt_headers_size;
+    size_t headers_size;
 
     out_image = get_dos_headers(dos_headers_size);
     nt_headers_size = dos_headers_size + (target_module.get_image().is_x32_image() ? sizeof(image_nt_headers32) : sizeof(image_nt_headers64));
@@ -100,7 +101,7 @@ void shibari_builder::process_relocations() {
 }
 
 
-std::vector<uint8_t> shibari_builder::get_dos_headers(uint32_t& headers_size) {
+std::vector<uint8_t> shibari_builder::get_dos_headers(size_t& headers_size) {
 #define GET_RICH_HASH(x,i) (((x) << (i)) | ((x) >> (32 - (i))))
 
     pe_image& image = target_module.get_image();
@@ -210,7 +211,7 @@ void _get_nt_header(pe_image& image, uint32_t header_size, std::vector<uint8_t>&
     nt_header.file_header.number_of_symbols = 0;
     nt_header.file_header.size_of_optional_header = sizeof(nt_header.optional_header);
     nt_header.file_header.characteristics = image.get_characteristics();
-    nt_header.file_header.characteristics &= ~(IMAGE_FILE_RELOCS_STRIPPED | IMAGE_FILE_LINE_NUMS_STRIPPED |
+    nt_header.file_header.characteristics &= ~(IMAGE_FILE_LINE_NUMS_STRIPPED |
         IMAGE_FILE_LOCAL_SYMS_STRIPPED | IMAGE_FILE_DEBUG_STRIPPED);
 
     nt_header.optional_header.magic = image_format::image_magic;
@@ -231,12 +232,12 @@ void _get_nt_header(pe_image& image, uint32_t header_size, std::vector<uint8_t>&
     nt_header.optional_header.section_alignment = image.get_section_align();
     nt_header.optional_header.file_alignment    = image.get_file_align();
 
-    nt_header.optional_header.major_operating_system_version = 5;//all windows versions from XP
-    nt_header.optional_header.minor_operating_system_version = 1;
+    nt_header.optional_header.major_operating_system_version = image.get_os_ver_major();//all windows versions from XP
+    nt_header.optional_header.minor_operating_system_version = image.get_os_ver_minor();
     nt_header.optional_header.major_image_version = image.get_image_ver_major();
     nt_header.optional_header.minor_image_version = image.get_image_ver_minor();
-    nt_header.optional_header.major_subsystem_version = 5;
-    nt_header.optional_header.minor_subsystem_version = 1;
+    nt_header.optional_header.major_subsystem_version = image.get_subsystem_ver_major();
+    nt_header.optional_header.minor_subsystem_version = image.get_subsystem_ver_minor();
 
     nt_header.optional_header.win32_version_value = 0;
 
@@ -281,7 +282,7 @@ void shibari_builder::get_nt_header(uint32_t header_size, std::vector<uint8_t>& 
     }
 }
 
-uint32_t  shibari_builder::calculate_headers_size(uint32_t dos_headers_size, bool build_relocations) {
+size_t  shibari_builder::calculate_headers_size(size_t dos_headers_size, bool build_relocations) {
     
     pe_image_expanded& expanded_image = target_module.get_module_expanded();
 
@@ -291,7 +292,7 @@ uint32_t  shibari_builder::calculate_headers_size(uint32_t dos_headers_size, boo
         expanded_image.exports.get_number_of_functions() ||
         expanded_image.exceptions.size() ||
         (expanded_image.tls.get_address_of_index() || expanded_image.tls.get_callbacks().size()) ||
-        (!expanded_image.image.is_x32_image() && expanded_image.exceptions.get_items().size()) ||
+        (!expanded_image.image.is_x32_image() && expanded_image.exceptions.get_exception_entries().size()) ||
         (!expanded_image.load_config.get_size());
 
     uint32_t total_sections = expanded_image.image.get_sections_number();
@@ -345,7 +346,7 @@ void shibari_builder::build_directories(bool build_relocations) {
         expanded_image.relocations.size() ||
         expanded_image.exceptions.size() ||
         (expanded_image.tls.get_address_of_index() || expanded_image.tls.get_callbacks().size()) ||
-        (!expanded_image.image.is_x32_image() && expanded_image.exceptions.get_items().size()) ||
+        (!expanded_image.image.is_x32_image() && expanded_image.exceptions.get_exception_entries().size()) ||
         (!expanded_image.load_config.get_size())
         ) {
 
@@ -355,8 +356,10 @@ void shibari_builder::build_directories(bool build_relocations) {
         dir_section.set_readable(true).set_writeable(true).set_executable(false);
 
         if ((!expanded_image.image.is_x32_image() && expanded_image.exceptions.size())) {
-            build_exceptions_table(expanded_image.image, dir_section, expanded_image.exceptions);  //build exceptions
+            build_extended_exceptions_info(expanded_image);
+            build_exceptions_table(expanded_image.image, dir_section, expanded_image.exceptions, expanded_image.relocations, true);  //build exceptions
         }
+
         if (expanded_image.exports.get_number_of_functions()) {                                    //build export
             build_export_table(expanded_image.image, dir_section, expanded_image.exports);
         }
