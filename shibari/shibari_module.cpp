@@ -173,6 +173,9 @@ msvc_rtti_desc& shibari_module::get_rtti() {
     return this->rtti;
 }
 
+pe_directory_placement& shibari_module::get_free_space() {
+    return this->free_space;
+}
 
 const pe_image&             shibari_module::get_image() const {
     return this->module_expanded.image;
@@ -210,6 +213,10 @@ const bound_import_table&   shibari_module::get_image_bound_imports() const {
 
 const msvc_rtti_desc& shibari_module::get_rtti() const {
     return this->rtti;
+}
+
+const pe_directory_placement& shibari_module::get_free_space() const {
+    return this->free_space;
 }
 
 pe_image_expanded&                       shibari_module::get_module_expanded() {

@@ -67,37 +67,45 @@ shibari_linker_errors shibari_data_linker::link_modules_finalize() {
 
     for (auto& module_ : *extended_modules) {
 
-        shift_rtti_data(module_, main_module);
+        for (auto& item : module_->get_free_space()) {//link free spaces
+            main_module->get_free_space()[item.first + module_->get_module_position().get_address_offset()] = item.second;
+        }
 
+        shift_rtti_data(module_, main_module); //link rtti data
 
-        shibari_module_export& module_export = module_->get_module_exports();
+        { //link rtti exports
 
-        if (module_export.get_exports_number()) {
-            for (auto& exp_item : module_export.get_export_items()) {
-                export_table_item item = exp_item;
-                item.set_rva(exp_item.get_rva() + module_->get_module_position().get_address_offset());
+            shibari_module_export& module_export = module_->get_module_exports();
 
-                main_module->get_module_exports().add_export(item);
-            }
+            if (module_export.get_exports_number()) {
+                for (auto& exp_item : module_export.get_export_items()) {
+                    export_table_item item = exp_item;
+                    item.set_rva(exp_item.get_rva() + module_->get_module_position().get_address_offset());
 
-            for (auto& exp_name : module_export.get_names()) {
-                main_module->get_module_exports().add_name(exp_name);
+                    main_module->get_module_exports().add_export(item);
+                }
+
+                for (auto& exp_name : module_export.get_names()) {
+                    main_module->get_module_exports().add_name(exp_name);
+                }
             }
         }
 
+        { //link sumbols
 
-        for (auto& code_symbol : module_->get_code_symbols()) {
-            main_module->get_code_symbols().push_back({
-                code_symbol.symbol_info_rva + module_->get_module_position().get_address_offset() ,
-                code_symbol.symbol_info_size
-                });
-        }
+            for (auto& code_symbol : module_->get_code_symbols()) {
+                main_module->get_code_symbols().push_back({
+                    code_symbol.symbol_info_rva + module_->get_module_position().get_address_offset() ,
+                    code_symbol.symbol_info_size
+                    });
+            }
 
-        for (auto& data_symbol : module_->get_data_symbols()) {
-            main_module->get_data_symbols().push_back({
-                data_symbol.symbol_info_rva + module_->get_module_position().get_address_offset() ,
-                data_symbol.symbol_info_size
-                });
+            for (auto& data_symbol : module_->get_data_symbols()) {
+                main_module->get_data_symbols().push_back({
+                    data_symbol.symbol_info_rva + module_->get_module_position().get_address_offset() ,
+                    data_symbol.symbol_info_size
+                    });
+            }
         }
 
         if (module_->get_image().get_characteristics()&IMAGE_FILE_DLL) {

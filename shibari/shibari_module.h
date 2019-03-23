@@ -92,6 +92,8 @@ class shibari_module{
 
     std::vector<shibari_module_symbol_info> code_symbols;
     std::vector<shibari_module_symbol_info> data_symbols;
+
+    pe_directory_placement free_space;
 public:
     shibari_module();
     shibari_module(const std::string& path);
@@ -116,6 +118,8 @@ public:
     bound_import_table&     get_image_bound_imports();
 
     msvc_rtti_desc& get_rtti();
+    pe_directory_placement& get_free_space();
+
 public:
     const pe_image&             get_image() const;
     const export_table&         get_image_exports() const;
@@ -129,6 +133,7 @@ public:
     const delay_import_table&   get_image_delay_imports() const;
     const bound_import_table&   get_image_bound_imports() const;
     const msvc_rtti_desc& get_rtti() const;
+    const pe_directory_placement& get_free_space() const;
 public:
     pe_image_expanded&                       get_module_expanded();
     shibari_module_position&                 get_module_position();

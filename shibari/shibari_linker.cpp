@@ -107,6 +107,8 @@ bool shibari_linker::explore_module(shibari_module * target_module) {
 
     erase_directories_placement(target_module->get_image(), placement, &target_module->get_image_relocations(), true);
 
+    target_module->get_free_space() = placement;
+
     if (target_module->get_image_delay_imports().get_libraries().size()) {//merge delay import
         for (auto &item : target_module->get_image_delay_imports().get_libraries()) {
             target_module->get_image_imports().add_library(item.convert_to_imported_library());
