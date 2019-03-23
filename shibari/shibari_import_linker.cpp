@@ -242,12 +242,12 @@ bool shibari_import_linker::process_import(shibari_module& target_module) {
     return true;
 }
 
-bool shibari_import_linker::get_import_func_index(import_table& imports,
-    std::string lib_name, std::string funcname,
+bool shibari_import_linker::get_import_func_index(const import_table& imports,
+    const std::string& lib_name,const std::string& funcname,
     uint32_t & lib_idx, uint32_t & func_idx) {
 
     for (unsigned int current_lib_idx = 0; current_lib_idx < imports.get_libraries().size(); current_lib_idx++) {
-        imported_library & current_library = imports.get_libraries()[current_lib_idx];
+        auto& current_library = imports.get_libraries()[current_lib_idx];
 
         auto& current_lib_name = current_library.get_library_name();
 
@@ -256,7 +256,7 @@ bool shibari_import_linker::get_import_func_index(import_table& imports,
             [](char a, char b) { return tolower(a) == tolower(b); })) {
 
             for (unsigned int current_func_idx = 0; current_func_idx < current_library.get_items().size(); current_func_idx++) {
-                imported_func& current_func = current_library.get_items()[current_func_idx];
+                auto& current_func = current_library.get_items()[current_func_idx];
 
                 if (current_func.is_import_by_name() && current_func.get_func_name() == funcname) {
 
@@ -272,12 +272,12 @@ bool shibari_import_linker::get_import_func_index(import_table& imports,
     return false;
 }
 
-bool shibari_import_linker::get_import_func_index(import_table& imports,
-    std::string lib_name, uint16_t func_ordinal,
+bool shibari_import_linker::get_import_func_index(const import_table& imports,
+    const std::string& lib_name, uint16_t func_ordinal,
     uint32_t & lib_idx, uint32_t & func_idx) {
 
     for (unsigned int current_lib_idx = 0; current_lib_idx < imports.get_libraries().size(); current_lib_idx++) {
-        imported_library & current_library = imports.get_libraries()[current_lib_idx];
+        auto& current_library = imports.get_libraries()[current_lib_idx];
 
         auto& current_lib_name = current_library.get_library_name();
 
@@ -286,7 +286,7 @@ bool shibari_import_linker::get_import_func_index(import_table& imports,
             [](char a, char b) { return tolower(a) == tolower(b); })) {
 
             for (unsigned int current_func_idx = 0; current_func_idx < current_library.get_items().size(); current_func_idx++) {
-                imported_func& current_func = current_library.get_items()[current_func_idx];
+                auto& current_func = current_library.get_items()[current_func_idx];
 
                 if (!current_func.is_import_by_name() && current_func.get_ordinal() == func_ordinal) {
 

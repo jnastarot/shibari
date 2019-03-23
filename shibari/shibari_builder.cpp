@@ -16,13 +16,13 @@ shibari_builder::shibari_builder(const shibari_module& _target_module, bool buil
     
     out_image.resize(headers_size);
 
-    align_sections(headers_size);
+    align_sections((uint32_t)headers_size);
 
     build_directories(build_relocations);
 
     {
         std::vector<uint8_t> nt_header;
-        get_nt_header(headers_size, nt_header);
+        get_nt_header((uint32_t)headers_size, nt_header);
         memcpy(&out_image.data()[dos_headers_size], nt_header.data(), nt_header.size());
     }
 
@@ -295,7 +295,7 @@ size_t  shibari_builder::calculate_headers_size(size_t dos_headers_size, bool bu
         (!expanded_image.image.is_x32_image() && expanded_image.exceptions.get_exception_entries().size()) ||
         (!expanded_image.load_config.get_size());
 
-    uint32_t total_sections = expanded_image.image.get_sections_number();
+    uint32_t total_sections = (uint32_t)expanded_image.image.get_sections_number();
 
     if (has_resources) {
         total_sections++;

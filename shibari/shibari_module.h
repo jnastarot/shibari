@@ -86,6 +86,8 @@ class shibari_module{
     shibari_module_position module_position;
     shibari_module_export   module_exports;
 
+    msvc_rtti_desc rtti;
+
     std::vector<shibari_module_entry_point> module_entrys;
 
     std::vector<shibari_module_symbol_info> code_symbols;
@@ -113,7 +115,7 @@ public:
     delay_import_table&     get_image_delay_imports();
     bound_import_table&     get_image_bound_imports();
 
-
+    msvc_rtti_desc& get_rtti();
 public:
     const pe_image&             get_image() const;
     const export_table&         get_image_exports() const;
@@ -126,7 +128,7 @@ public:
     const load_config_table&    get_image_load_config() const;
     const delay_import_table&   get_image_delay_imports() const;
     const bound_import_table&   get_image_bound_imports() const;
-
+    const msvc_rtti_desc& get_rtti() const;
 public:
     pe_image_expanded&                       get_module_expanded();
     shibari_module_position&                 get_module_position();

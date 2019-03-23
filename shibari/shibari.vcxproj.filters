@@ -84,6 +84,9 @@
     <ClInclude Include="shibari_data_linker.h">
       <Filter>Заголовочные файлы\shibari\linker\data</Filter>
     </ClInclude>
+    <ClInclude Include="shibari_data_linker_rtti_msvc.h">
+      <Filter>Заголовочные файлы\shibari\linker\data</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

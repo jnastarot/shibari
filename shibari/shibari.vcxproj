@@ -154,6 +154,7 @@
     <ClInclude Include="shibari.h" />
     <ClInclude Include="shibari_builder.h" />
     <ClInclude Include="shibari_data_linker.h" />
+    <ClInclude Include="shibari_data_linker_rtti_msvc.h" />
     <ClInclude Include="shibari_exceptions_linker.h" />
     <ClInclude Include="shibari_export_linker.h" />
     <ClInclude Include="shibari_import_linker.h" />

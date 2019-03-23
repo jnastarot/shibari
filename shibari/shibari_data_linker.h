@@ -3,6 +3,8 @@ class shibari_data_linker {
     std::vector<shibari_module*>* extended_modules;
     shibari_module* main_module;
 
+    void shift_rtti_data(shibari_module* extended_module, shibari_module* main_module);
+
 public:
     shibari_data_linker(std::vector<shibari_module*>* extended_modules, shibari_module* main_module);
     ~shibari_data_linker();

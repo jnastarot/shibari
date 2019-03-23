@@ -97,6 +97,7 @@ shibari_module::shibari_module(const pe_image& image) {
     if (image.get_image_status() == pe_image_status::pe_image_status_ok) {
         get_expanded_pe_image(this->module_expanded, image);
         get_extended_exception_info(this->module_expanded);
+        get_runtime_type_information(this->module_expanded, this->rtti);
 
         if (this->module_expanded.code != directory_code::directory_code_success) {
             this->module_code = shibari_module_code::shibari_module_incorrect;
@@ -116,9 +117,7 @@ shibari_module::shibari_module(const std::string& path) {
 shibari_module::shibari_module(const shibari_module &module) {
     this->operator=(module);
 }
-shibari_module::~shibari_module() {
-    free_extended_exception_info(this->module_expanded);
-}
+shibari_module::~shibari_module() { }
 
 shibari_module& shibari_module::operator=(const shibari_module& _module) {
 
@@ -128,9 +127,7 @@ shibari_module& shibari_module::operator=(const shibari_module& _module) {
     this->module_exports  = _module.module_exports;
     this->module_entrys   = _module.module_entrys;
 
-    if (!_module.get_image().is_x32_image()) {
-        copy_extended_exceptions_info(this->module_expanded, _module.module_expanded);
-    }
+    this->rtti = _module.rtti;
 
     return *this;
 }
@@ -172,6 +169,10 @@ delay_import_table&     shibari_module::get_image_delay_imports() {
 bound_import_table&     shibari_module::get_image_bound_imports() {
     return this->module_expanded.bound_imports;
 }
+msvc_rtti_desc& shibari_module::get_rtti() {
+    return this->rtti;
+}
+
 
 const pe_image&             shibari_module::get_image() const {
     return this->module_expanded.image;
@@ -205,6 +206,10 @@ const delay_import_table&   shibari_module::get_image_delay_imports() const {
 }
 const bound_import_table&   shibari_module::get_image_bound_imports() const {
     return this->module_expanded.bound_imports;
+}
+
+const msvc_rtti_desc& shibari_module::get_rtti() const {
+    return this->rtti;
 }
 
 pe_image_expanded&                       shibari_module::get_module_expanded() {

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "shibari_data_linker.h"
+#include "shibari_data_linker_rtti_msvc.h"
 
 
 shibari_data_linker::shibari_data_linker(std::vector<shibari_module*>* extended_modules, shibari_module* main_module)
@@ -65,6 +66,10 @@ shibari_linker_errors shibari_data_linker::link_modules_finalize() {
     );
 
     for (auto& module_ : *extended_modules) {
+
+        shift_rtti_data(module_, main_module);
+
+
         shibari_module_export& module_export = module_->get_module_exports();
 
         if (module_export.get_exports_number()) {
@@ -168,4 +173,14 @@ shibari_linker_errors shibari_data_linker::link_modules_finalize() {
     }
 
     return shibari_linker_errors::shibari_linker_ok;
+}
+
+
+void shibari_data_linker::shift_rtti_data(shibari_module* extended_module, shibari_module* main_module) {
+
+    msvc_shift_module_rtti(extended_module, main_module);
+
+    
+
+
 }

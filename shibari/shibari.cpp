@@ -3,12 +3,11 @@
 
 
 
-shibari::shibari() {
+shibari::shibari() 
+ : main_module(0){}
 
-}
-shibari::~shibari() {
-
-}
+shibari::~shibari() 
+{}
 
 shibari_linker_errors shibari::exec_shibari(std::vector<uint8_t>& out_image) {
 
