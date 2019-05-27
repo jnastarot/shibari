@@ -12,18 +12,18 @@ shibari_exceptions_linker::~shibari_exceptions_linker()
 
 
 shibari_linker_errors shibari_exceptions_linker::link_modules() {
-    if (main_module->get_image().is_x32_image()) { return shibari_linker_errors::shibari_linker_error_bad_input; }
+    if (main_module->get_module_image().get_image().is_x32_image()) { return shibari_linker_errors::shibari_linker_error_bad_input; }
 
     for (auto& ex_module : *extended_modules) {
         uint32_t module_offset = ex_module->get_module_position().get_address_offset();
 
 
-        for (auto& unwind_entry_ : ex_module->get_image_exceptions().get_unwind_entries()) {
+        for (auto& unwind_entry_ : ex_module->get_module_image().get_exceptions().get_unwind_entries()) {
 
-            main_module->get_image_exceptions().get_unwind_entries().push_back(unwind_entry_);
+            main_module->get_module_image().get_exceptions().get_unwind_entries().push_back(unwind_entry_);
 
-            auto& temp_unwind_entry = main_module->get_image_exceptions().get_unwind_entries()[
-                main_module->get_image_exceptions().get_unwind_entries().size() - 1
+            auto& temp_unwind_entry = main_module->get_module_image().get_exceptions().get_unwind_entries()[
+                main_module->get_module_image().get_exceptions().get_unwind_entries().size() - 1
             ];
 
             temp_unwind_entry.set_unwind_info_rva(temp_unwind_entry.get_unwind_info_rva() + module_offset);
@@ -171,13 +171,13 @@ shibari_linker_errors shibari_exceptions_linker::link_modules() {
 
         }
 
-        for (auto& exception_entry : ex_module->get_image_exceptions().get_exception_entries()) {
+        for (auto& exception_entry : ex_module->get_module_image().get_exceptions().get_exception_entries()) {
             auto temp_entry = exception_entry;
             temp_entry.set_begin_address(temp_entry.get_begin_address() + module_offset);
             temp_entry.set_end_address(temp_entry.get_end_address() + module_offset);
             temp_entry.set_unwind_data_address(temp_entry.get_unwind_data_address() + module_offset);
 
-            main_module->get_image_exceptions().add_exception_entry(temp_entry);
+            main_module->get_module_image().get_exceptions().add_exception_entry(temp_entry);
         }
     }
 

@@ -15,10 +15,10 @@ shibari_linker_errors shibari_tls_linker::link_modules() {
 
     for (auto& module : *extended_modules) {
 
-        if (module->get_image_tls().get_callbacks().size()) {
+        if (module->get_module_image().get_tls().get_callbacks().size()) {
 
-            for (auto& item : module->get_image_tls().get_callbacks()) {
-                main_module->get_image_tls().get_callbacks().push_back({
+            for (auto& item : module->get_module_image().get_tls().get_callbacks()) {
+                main_module->get_module_image().get_tls().get_callbacks().push_back({
                     module->get_module_position().get_address_offset() + item.rva_callback ,item.use_relocation
                     });
             }

@@ -2,6 +2,7 @@
 
 enum shibari_linker_errors {
     shibari_linker_ok,
+    shibari_linker_error_build,
     shibari_linker_error_bad_input,
     shibari_linker_error_export_linking,
     shibari_linker_error_import_linking,
@@ -24,6 +25,7 @@ class shibari_linker{
     std::vector<shibari_module*> extended_modules;
     shibari_module* main_module;
 
+    void process_relocations();
     bool explore_module(shibari_module * module);
 public:
     shibari_linker(std::vector<shibari_module*>& extended_modules,shibari_module* main_module);

@@ -24,7 +24,7 @@ shibari_linker_errors shibari_linker::link_modules() {
     }
 
     for (auto &module : extended_modules) {
-        if (!module || main_module->get_image().is_x32_image() != module->get_image().is_x32_image() || !explore_module(module)) {
+        if (!module || main_module->get_module_image().get_image().is_x32_image() != module->get_module_image().get_image().is_x32_image() || !explore_module(module)) {
             return shibari_linker_errors::shibari_linker_error_bad_input;
         }
     }
@@ -58,7 +58,7 @@ shibari_linker_errors shibari_linker::link_modules() {
     result = linker_loadconfigs.link_modules();
     if (result != shibari_linker_errors::shibari_linker_ok) { return result; }
 
-    if (!main_module->get_image().is_x32_image()) {
+    if (!main_module->get_module_image().get_image().is_x32_image()) {
         result = linker_exceptions.link_modules();
         if (result != shibari_linker_errors::shibari_linker_ok) { return result; }
     }
@@ -95,23 +95,22 @@ bool shibari_linker::explore_module(shibari_module * target_module) {
     }
 
     
+    pe_placement placement;
+    pe_directory_code code =  get_directories_placement(target_module->get_module_image().get_image(), placement, &target_module->get_module_image().get_bound_imports());
+    get_extended_exception_info_placement(target_module->get_module_image(), placement);
 
-    pe_directory_placement placement;
-    directory_code code =  get_directories_placement(target_module->get_image(), placement, &target_module->get_image_bound_imports());
-    get_extended_exception_info_placement(target_module->get_module_expanded(), placement);
 
-
-    if (code != directory_code::directory_code_success) { 
+    if (code != pe_directory_code_success) { 
         return false; 
     }
 
-    erase_directories_placement(target_module->get_image(), placement, &target_module->get_image_relocations(), true);
+    pe_erase_placement(target_module->get_module_image().get_image(), placement, &target_module->get_module_image().get_relocations(), true);
 
     target_module->get_free_space() = placement;
 
-    if (target_module->get_image_delay_imports().get_libraries().size()) {//merge delay import
-        for (auto &item : target_module->get_image_delay_imports().get_libraries()) {
-            target_module->get_image_imports().add_library(item.convert_to_imported_library());
+    if (target_module->get_module_image().get_delay_imports().get_libraries().size()) {//merge delay import
+        for (auto &item : target_module->get_module_image().get_delay_imports().get_libraries()) {
+            target_module->get_module_image().get_imports().add_library(item.convert_to_imported_library());
         }
     }
 
@@ -124,21 +123,22 @@ bool shibari_linker::explore_module(shibari_module * target_module) {
     }
 
 
-    for (auto& section_ : target_module->get_image().get_sections()) {
+    for (auto& section_ : target_module->get_module_image().get_image().get_sections()) {
         if (section_->get_virtual_size() < section_->get_size_of_raw_data()) {
             section_->set_virtual_size(section_->get_size_of_raw_data());
         }
     }
 
-    if (target_module->get_image_exports().get_items().size()) {
-        for (auto& export_func : target_module->get_image_exports().get_items()) {
+    if (target_module->get_module_image().get_exports().get_entries().size()) {
+        for (auto& export_func : target_module->get_module_image().get_exports().get_entries()) {
             target_module->get_module_exports().add_export(export_func);
         }
 
-        target_module->get_module_exports().add_name(target_module->get_image_exports().get_library_name());
+        target_module->get_module_exports().add_name(target_module->get_module_image().get_exports().get_library_name());
     }
 
     target_module->set_module_code(shibari_module_initialization_success);
 
     return true; 
 }
+

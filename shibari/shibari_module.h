@@ -55,7 +55,7 @@ public:
 
 class shibari_module_export {
     std::vector<std::string>       extended_names;
-    std::vector<export_table_item> export_items;
+    std::vector<pe_export_entry>   export_entries;
 public:
     shibari_module_export();
     shibari_module_export(const shibari_module_export& module_export);
@@ -65,7 +65,7 @@ public:
     shibari_module_export& operator=(const shibari_module_export& module_export);
 public:
     void add_name(const std::string& name);
-    void add_export(const export_table_item& item);
+    void add_export(const pe_export_entry& item);
     
     void clear_names();
     void clear_exports();
@@ -75,14 +75,14 @@ public:
 
     std::vector<std::string>&       get_names() ;
     const std::vector<std::string>&       get_names() const;
-    std::vector<export_table_item>& get_export_items();
-    const std::vector<export_table_item>& get_export_items() const;
+    std::vector<pe_export_entry>& get_export_items();
+    const std::vector<pe_export_entry>& get_export_items() const;
 };
 
 
 class shibari_module{
     shibari_module_code     module_code;
-    pe_image_expanded       module_expanded;
+    pe_image_full           image_full;
     shibari_module_position module_position;
     shibari_module_export   module_exports;
 
@@ -93,7 +93,7 @@ class shibari_module{
     std::vector<shibari_module_symbol_info> code_symbols;
     std::vector<shibari_module_symbol_info> data_symbols;
 
-    pe_directory_placement free_space;
+    pe_placement free_space;
 public:
     shibari_module();
     shibari_module(const std::string& path);
@@ -105,37 +105,14 @@ public:
 
     void set_module_code(shibari_module_code code);
 public:
-    pe_image&               get_image();
-    export_table&		    get_image_exports();
-    import_table&		    get_image_imports();
-    resource_directory&	    get_image_resources();
-    exceptions_table&	    get_image_exceptions();
-    relocation_table&	    get_image_relocations();
-    debug_table&	        get_image_debug();
-    tls_table&			    get_image_tls();
-    load_config_table&	    get_image_load_config();
-    delay_import_table&     get_image_delay_imports();
-    bound_import_table&     get_image_bound_imports();
-
     msvc_rtti_desc& get_rtti();
-    pe_directory_placement& get_free_space();
+    pe_placement& get_free_space();
 
 public:
-    const pe_image&             get_image() const;
-    const export_table&         get_image_exports() const;
-    const import_table&         get_image_imports() const;
-    const resource_directory&   get_image_resources() const;
-    const exceptions_table&	    get_image_exceptions() const;
-    const relocation_table&	    get_image_relocations() const;
-    const debug_table&	        get_image_debug() const;
-    const tls_table&            get_image_tls() const;
-    const load_config_table&    get_image_load_config() const;
-    const delay_import_table&   get_image_delay_imports() const;
-    const bound_import_table&   get_image_bound_imports() const;
     const msvc_rtti_desc& get_rtti() const;
-    const pe_directory_placement& get_free_space() const;
+    const pe_placement& get_free_space() const;
 public:
-    pe_image_expanded&                       get_module_expanded();
+    pe_image_full&                           get_module_image();
     shibari_module_position&                 get_module_position();
     shibari_module_export&                   get_module_exports();
     std::vector<shibari_module_entry_point>& get_module_entrys();
@@ -143,7 +120,7 @@ public:
     std::vector<shibari_module_symbol_info>& get_data_symbols();
 
 public:
-    const pe_image_expanded&                       get_module_expanded() const;
+    const pe_image_full&                           get_module_image() const;
     const shibari_module_position&                 get_module_position() const;
     const shibari_module_export&                   get_module_exports() const;
     const std::vector<shibari_module_entry_point>& get_module_entrys() const;

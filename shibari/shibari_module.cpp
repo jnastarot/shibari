@@ -47,7 +47,7 @@ shibari_module_export::~shibari_module_export() {
 
 shibari_module_export& shibari_module_export::operator=(const shibari_module_export& module_export) {
     this->extended_names = module_export.extended_names;
-    this->export_items   = module_export.export_items;
+    this->export_entries = module_export.export_entries;
 
     return *this;
 }
@@ -56,22 +56,22 @@ void shibari_module_export::add_name(const std::string& name) {
     this->extended_names.push_back(name);
 }
 
-void shibari_module_export::add_export(const export_table_item& item) {
-    this->export_items.push_back(item);
+void shibari_module_export::add_export(const pe_export_entry& entry) {
+    this->export_entries.push_back(entry);
 }
 
 void shibari_module_export::clear_names() {
     this->extended_names.clear();
 }
 void shibari_module_export::clear_exports() {
-    this->export_items.clear();
+    this->export_entries.clear();
 }
 
 size_t shibari_module_export::get_names_number() const {
     return this->extended_names.size();
 }
 size_t shibari_module_export::get_exports_number() const {
-    return this->export_items.size();
+    return this->export_entries.size();
 }
 
 std::vector<std::string>&       shibari_module_export::get_names() {
@@ -81,11 +81,11 @@ const std::vector<std::string>& shibari_module_export::get_names() const {
     return this->extended_names;
 }
 
-std::vector<export_table_item>& shibari_module_export::get_export_items() {
-    return this->export_items;
+std::vector<pe_export_entry>& shibari_module_export::get_export_items() {
+    return this->export_entries;
 }
-const std::vector<export_table_item>& shibari_module_export::get_export_items() const {
-    return this->export_items;
+const std::vector<pe_export_entry>& shibari_module_export::get_export_items() const {
+    return this->export_entries;
 }
 
 shibari_module::shibari_module() {
@@ -95,11 +95,13 @@ shibari_module::shibari_module() {
 shibari_module::shibari_module(const pe_image& image) {
 
     if (image.get_image_status() == pe_image_status::pe_image_status_ok) {
-        get_expanded_pe_image(this->module_expanded, image);
-        get_extended_exception_info(this->module_expanded);
-        get_runtime_type_information(this->module_expanded, this->rtti);
 
-        if (this->module_expanded.code != directory_code::directory_code_success) {
+        this->image_full = image;
+
+        get_extended_exception_info(this->image_full);
+        get_runtime_type_information(this->image_full, this->rtti);
+
+        if (this->image_full.get_directory_code() != pe_directory_code_success) {
             this->module_code = shibari_module_code::shibari_module_incorrect;
         }
         else {
@@ -122,7 +124,7 @@ shibari_module::~shibari_module() { }
 shibari_module& shibari_module::operator=(const shibari_module& _module) {
 
     this->module_code     = _module.module_code;
-    this->module_expanded = _module.module_expanded;
+    this->image_full      = _module.image_full;
     this->module_position = _module.module_position;
     this->module_exports  = _module.module_exports;
     this->module_entrys   = _module.module_entrys;
@@ -136,91 +138,23 @@ void shibari_module::set_module_code(shibari_module_code code) {
     this->module_code = code;
 }
 
-pe_image&               shibari_module::get_image() {
-    return this->module_expanded.image;
-}
-export_table&		    shibari_module::get_image_exports() {
-    return this->module_expanded.exports;
-}
-import_table&		    shibari_module::get_image_imports() {
-    return this->module_expanded.imports;
-}
-resource_directory&	    shibari_module::get_image_resources() {
-    return this->module_expanded.resources;
-}
-exceptions_table&	    shibari_module::get_image_exceptions() {
-    return this->module_expanded.exceptions;
-}
-relocation_table&	    shibari_module::get_image_relocations() {
-    return this->module_expanded.relocations;
-}
-debug_table&	        shibari_module::get_image_debug() {
-    return this->module_expanded.debug;
-}
-tls_table&			    shibari_module::get_image_tls() {
-    return this->module_expanded.tls;
-}
-load_config_table&	    shibari_module::get_image_load_config() {
-    return this->module_expanded.load_config;
-}
-delay_import_table&     shibari_module::get_image_delay_imports() {
-    return this->module_expanded.delay_imports;
-}
-bound_import_table&     shibari_module::get_image_bound_imports() {
-    return this->module_expanded.bound_imports;
-}
 msvc_rtti_desc& shibari_module::get_rtti() {
     return this->rtti;
 }
-
-pe_directory_placement& shibari_module::get_free_space() {
+pe_placement& shibari_module::get_free_space() {
     return this->free_space;
-}
-
-const pe_image&             shibari_module::get_image() const {
-    return this->module_expanded.image;
-}
-const export_table&         shibari_module::get_image_exports() const {
-    return this->module_expanded.exports;
-}
-const import_table&         shibari_module::get_image_imports() const {
-    return this->module_expanded.imports;
-}
-const resource_directory&   shibari_module::get_image_resources() const {
-    return this->module_expanded.resources;
-}
-const exceptions_table&	    shibari_module::get_image_exceptions() const {
-    return this->module_expanded.exceptions;
-}
-const relocation_table&	    shibari_module::get_image_relocations() const {
-    return this->module_expanded.relocations;
-}
-const debug_table&	        shibari_module::get_image_debug() const {
-    return this->module_expanded.debug;
-}
-const tls_table&            shibari_module::get_image_tls() const {
-    return this->module_expanded.tls;
-}
-const load_config_table&    shibari_module::get_image_load_config() const {
-    return this->module_expanded.load_config;
-}
-const delay_import_table&   shibari_module::get_image_delay_imports() const {
-    return this->module_expanded.delay_imports;
-}
-const bound_import_table&   shibari_module::get_image_bound_imports() const {
-    return this->module_expanded.bound_imports;
 }
 
 const msvc_rtti_desc& shibari_module::get_rtti() const {
     return this->rtti;
 }
 
-const pe_directory_placement& shibari_module::get_free_space() const {
+const pe_placement& shibari_module::get_free_space() const {
     return this->free_space;
 }
 
-pe_image_expanded&                       shibari_module::get_module_expanded() {
-    return this->module_expanded;
+pe_image_full&                       shibari_module::get_module_image() {
+    return this->image_full;
 }
 shibari_module_position&                 shibari_module::get_module_position() {
     return this->module_position;
@@ -238,8 +172,8 @@ std::vector<shibari_module_symbol_info>& shibari_module::get_data_symbols() {
     return this->data_symbols;
 }
 
-const pe_image_expanded&                       shibari_module::get_module_expanded() const {
-    return this->module_expanded;
+const pe_image_full&                       shibari_module::get_module_image() const {
+    return this->image_full;
 }
 const shibari_module_position&                 shibari_module::get_module_position() const {
     return this->module_position;

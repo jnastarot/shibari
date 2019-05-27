@@ -8,18 +8,11 @@ int main(int argc, const char **argv){
     std::vector<shibari_module *> modules;
     std::string out_name = "shibari_result.exe";
  
-    modules.push_back(new shibari_module(pe_image(std::string("..\\..\\app for test\\shibari_test.exe"))));
-    modules.push_back(new shibari_module(pe_image(std::string("..\\..\\app for test\\test_dll.dll"))));
-    modules[1]->get_module_exports().add_name("user32.dll");
-    
-    /*
-
     if (argc < 2) {
         printf("need more parameters !\n");
         system("PAUSE");
         return 0;
     }
-
     
     for (int arg_idx = 1; arg_idx < argc; arg_idx++) {
 
@@ -49,8 +42,9 @@ int main(int argc, const char **argv){
             out_name = std::string(argv[arg_idx] + 8);
         }
     }
-    */
+    
 
+    
     shi.set_main_module(modules[0]);
     for (unsigned int module_idx = 1; module_idx < modules.size(); module_idx++) {
         shi.add_extended_module(modules[module_idx]);
@@ -59,7 +53,7 @@ int main(int argc, const char **argv){
     std::vector<uint8_t> out_exe;
 
     unsigned int exec_start_time = clock();
-    switch (shi.exec_shibari(out_exe)) {
+    switch (shi.exec_shibari(PE_IMAGE_BUILD_ALL_EXTENDED_SECTIONS, out_exe)) {
 
     case shibari_linker_ok: {
         printf("finished in %f\n",(clock() - exec_start_time)/1000.f);
@@ -106,7 +100,7 @@ int main(int argc, const char **argv){
     default:
         break;
     }
-
+    
 
     system("PAUSE");
     return 0;

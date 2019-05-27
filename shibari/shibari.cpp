@@ -9,18 +9,17 @@ shibari::shibari()
 shibari::~shibari() 
 {}
 
-shibari_linker_errors shibari::exec_shibari(std::vector<uint8_t>& out_image) {
+shibari_linker_errors shibari::exec_shibari(uint32_t enma_build_flags, std::vector<uint8_t>& out_image) {
 
-    bool main_has_relocations = main_module->get_image_relocations().size() != 0;
     shibari_linker_errors linker_ret = shibari_linker(extended_modules, main_module).link_modules();
 
     if (linker_ret != shibari_linker_errors::shibari_linker_ok) {
         return linker_ret;
     }
 
-    shibari_builder(*main_module, main_has_relocations, out_image);
-
-    return shibari_linker_errors::shibari_linker_ok;
+    return build_shibari_image(main_module->get_module_image(),
+        PE_IMAGE_BUILD_ALL_DIRECTORIES | enma_build_flags,
+        out_image) ? shibari_linker_ok : shibari_linker_error_build;
 }
 
 

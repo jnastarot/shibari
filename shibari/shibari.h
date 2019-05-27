@@ -2,7 +2,6 @@
 
 class shibari_module;
 class shibari_linker;
-class shibari_builder;
 
 
 #include "shibari_module.h"
@@ -17,7 +16,7 @@ public:
     shibari();
     ~shibari();
 
-    shibari_linker_errors exec_shibari(std::vector<uint8_t>& out_image);
+    shibari_linker_errors exec_shibari(uint32_t enma_build_flags, std::vector<uint8_t>& out_image);
 public:
     void set_main_module(shibari_module* module);
     void add_extended_module(shibari_module* module);
