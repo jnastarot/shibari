@@ -99,8 +99,6 @@ std::vector<uint8_t> get_dos_headers(pe_image& image, uint32_t build_flags, size
 template<typename pe_image_format>
 void _get_nt_header(pe_image& image, uint32_t header_size, std::vector<uint8_t>& header) {
 
-    typename pe_image_format::image_nt_headers nt_header;
-
     memset(&nt_header, 0, sizeof(typename pe_image_format::image_nt_headers));
 
     nt_header.signature = IMAGE_NT_SIGNATURE;
@@ -108,12 +106,10 @@ void _get_nt_header(pe_image& image, uint32_t header_size, std::vector<uint8_t>&
     nt_header.file_header.machine = image.get_machine();
     nt_header.file_header.number_of_sections = (uint16_t)image.get_sections_number();
     nt_header.file_header.time_date_stamp = image.get_timestamp();
-    nt_header.file_header.pointer_to_symbol_table = 0;
-    nt_header.file_header.number_of_symbols = 0;
+    nt_header.file_header.pointer_to_symbol_table = image.get_pointer_to_symbol_table();
+    nt_header.file_header.number_of_symbols = image.get_number_of_symbols();
     nt_header.file_header.size_of_optional_header = sizeof(nt_header.optional_header);
     nt_header.file_header.characteristics = image.get_characteristics();
-    // nt_header.file_header.characteristics &= ~(IMAGE_FILE_LINE_NUMS_STRIPPED |
-    //     IMAGE_FILE_LOCAL_SYMS_STRIPPED | IMAGE_FILE_DEBUG_STRIPPED);
 
     nt_header.optional_header.magic = pe_image_format::image_magic;
 
@@ -140,7 +136,7 @@ void _get_nt_header(pe_image& image, uint32_t header_size, std::vector<uint8_t>&
     nt_header.optional_header.major_subsystem_version = image.get_subsystem_ver_major();
     nt_header.optional_header.minor_subsystem_version = image.get_subsystem_ver_minor();
 
-    nt_header.optional_header.win32_version_value = 0;
+    nt_header.optional_header.win32_version_value = image.get_win32_version_value();
 
     nt_header.optional_header.size_of_image = ALIGN_UP(
         (image.get_sections()[image.get_sections_number() - 1]->get_virtual_address() +
@@ -159,7 +155,7 @@ void _get_nt_header(pe_image& image, uint32_t header_size, std::vector<uint8_t>&
     nt_header.optional_header.size_of_heap_reserve = (typename pe_image_format::ptr_size)image.get_heap_reserve_size();
     nt_header.optional_header.size_of_heap_commit = (typename pe_image_format::ptr_size)image.get_heap_commit_size();
 
-    nt_header.optional_header.loader_flags = 0;
+    nt_header.optional_header.loader_flags = image.get_loader_flags();
     nt_header.optional_header.number_of_rva_and_sizes = IMAGE_NUMBEROF_DIRECTORY_ENTRIES;
 
     for (unsigned int dir_idx = 0; dir_idx < IMAGE_NUMBEROF_DIRECTORY_ENTRIES; dir_idx++) {
