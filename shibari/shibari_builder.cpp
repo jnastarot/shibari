@@ -99,6 +99,9 @@ std::vector<uint8_t> get_dos_headers(pe_image& image, uint32_t build_flags, size
 template<typename pe_image_format>
 void _get_nt_header(pe_image& image, uint32_t header_size, std::vector<uint8_t>& header) {
 
+    typename pe_image_format::image_nt_headers nt_header;
+
+
     memset(&nt_header, 0, sizeof(typename pe_image_format::image_nt_headers));
 
     nt_header.signature = IMAGE_NT_SIGNATURE;
