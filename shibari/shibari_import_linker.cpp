@@ -12,12 +12,12 @@ shibari_linker_errors shibari_import_linker::link_modules() {
 
     for (auto& module : *extended_modules) {
         for (auto & lib : module->get_module_image().get_imports().get_libraries()) {
-            imported_library* main_lib;
+            pe_import_library* main_lib;
             if (main_module->get_module_image().get_imports().get_imported_lib(lib.get_library_name(), main_lib)) {
 
                 for (auto & func : lib.get_entries()) {
-                    imported_library* main_lib_;
-                    pe_import_entry * main_func_;
+                    pe_import_library* main_lib_;
+                    pe_import_function * main_func_;
                     if (func.is_import_by_name()) {
                         if (!main_module->get_module_image().get_imports().get_imported_func(lib.get_library_name(), func.get_func_name(), main_lib_, main_func_)) {
                             main_lib->add_entry(func);
@@ -103,13 +103,13 @@ bool shibari_import_linker::switch_import_refs(pe_image_full& image_full, pe_imp
             unsigned int reloc_lib_idx = GET_HI_NUMBER(reloc_entry.relocation_id);
             unsigned int reloc_func_idx = GET_LO_NUMBER(reloc_entry.relocation_id);
 
-            imported_library& reloc_ref_lib = image_full.get_imports().get_libraries()[reloc_lib_idx];
-            pe_import_entry& reloc_ref_func = reloc_ref_lib.get_entries()[reloc_func_idx];
+            pe_import_library& reloc_ref_lib = image_full.get_imports().get_libraries()[reloc_lib_idx];
+            pe_import_function& reloc_ref_func = reloc_ref_lib.get_entries()[reloc_func_idx];
 
 
             //handle refs to import
             for (unsigned int new_import_lib_idx = 0; new_import_lib_idx < new_import_table.size(); new_import_lib_idx++) {
-                imported_library& new_import_lib = new_import_table.get_libraries()[new_import_lib_idx];
+                pe_import_library& new_import_lib = new_import_table.get_libraries()[new_import_lib_idx];
 
 
                 auto& new_import_lib_name = new_import_lib.get_library_name();
@@ -120,7 +120,7 @@ bool shibari_import_linker::switch_import_refs(pe_image_full& image_full, pe_imp
                     [](char a, char b) { return tolower(a) == tolower(b); })) {
 
                     for (unsigned int new_import_func_idx = 0; new_import_func_idx < new_import_lib.size(); new_import_func_idx++) {
-                        pe_import_entry& new_import_func = new_import_lib.get_entries()[new_import_func_idx];
+                        pe_import_function& new_import_func = new_import_lib.get_entries()[new_import_func_idx];
 
                         if (reloc_ref_func.is_import_by_name()) {
 
@@ -176,13 +176,13 @@ bool shibari_import_linker::process_import(shibari_module& target_module) {
     image_full.get_image().get_last_section()->set_executable(true); //TODO: FIXIT last section can be not last ;)
 
     for (unsigned int lib_idx = 0; lib_idx < image_full.get_imports().size(); lib_idx++) {
-        imported_library& current_lib = image_full.get_imports().get_libraries()[lib_idx];
+        pe_import_library& current_lib = image_full.get_imports().get_libraries()[lib_idx];
 
         pe_image_io iat_io(image_full.get_image(), enma_io_mode_allow_expand);
 
 
         for (unsigned int func_idx = 0; func_idx < current_lib.size(); func_idx++) {
-            pe_import_entry& current_func = current_lib.get_entries()[func_idx];
+            pe_import_function& current_func = current_lib.get_entries()[func_idx];
 
             if (image_full.get_image().is_x32_image()) {
                 uint32_t import_wrapper_rva = iat_wrapper_io.get_image_offset();

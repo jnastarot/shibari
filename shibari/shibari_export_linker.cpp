@@ -143,7 +143,7 @@ bool get_export_references(std::vector<shibari_module*>& extended_modules, shiba
         if (module_export.get_exports_number()) {
 
             for (unsigned int import_lib_idx = 0; import_lib_idx < imports.get_libraries().size(); import_lib_idx++) {
-                imported_library & import_lib = imports.get_libraries()[import_lib_idx];
+                pe_import_library & import_lib = imports.get_libraries()[import_lib_idx];
                 std::string current_export_lib_name;
 
                 bool is_lib_name_match = false;
@@ -164,7 +164,7 @@ bool get_export_references(std::vector<shibari_module*>& extended_modules, shiba
                 if (is_lib_name_match) {
 
                     for (unsigned int import_func_idx = 0; import_func_idx < import_lib.get_entries().size(); import_func_idx++) {
-                        pe_import_entry& import_func = import_lib.get_entries()[import_func_idx];
+                        pe_import_function& import_func = import_lib.get_entries()[import_func_idx];
 
                         for (auto & export_item : module_export.get_export_items()) {
 

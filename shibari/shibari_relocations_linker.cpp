@@ -59,8 +59,8 @@ shibari_linker_errors shibari_relocations_linker::link_modules() {
                     unsigned int src_lib_idx = GET_HI_NUMBER(entry.relocation_id);
                     unsigned int src_func_idx = GET_LO_NUMBER(entry.relocation_id);
 
-                    imported_library& src_library = module->get_module_image().get_imports().get_libraries()[src_lib_idx];
-                    pe_import_entry&    src_func = src_library.get_entries()[src_func_idx];
+                    pe_import_library& src_library = module->get_module_image().get_imports().get_libraries()[src_lib_idx];
+                    pe_import_function&    src_func = src_library.get_entries()[src_func_idx];
 
                     unsigned int dst_lib_idx;
                     unsigned int dst_func_idx;

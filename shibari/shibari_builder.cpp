@@ -261,8 +261,8 @@ void process_relocations(pe_image_full& image_full) {
             unsigned int reloc_lib_idx = GET_HI_NUMBER(reloc_item.relocation_id);
             unsigned int reloc_func_idx = GET_LO_NUMBER(reloc_item.relocation_id);
 
-            imported_library& reloc_ref_lib = image_full.get_imports().get_libraries()[reloc_lib_idx];
-            pe_import_entry& reloc_ref_func = reloc_ref_lib.get_entries()[reloc_func_idx];
+            pe_import_library& reloc_ref_lib = image_full.get_imports().get_libraries()[reloc_lib_idx];
+            pe_import_function& reloc_ref_func = reloc_ref_lib.get_entries()[reloc_func_idx];
 
             pe_section * target_section = image_full.get_image().get_section_by_rva(reloc_item.relative_virtual_address);
 

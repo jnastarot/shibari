@@ -110,7 +110,7 @@ bool shibari_linker::explore_module(shibari_module * target_module) {
 
     if (target_module->get_module_image().get_delay_imports().get_libraries().size()) {//merge delay import
         for (auto &item : target_module->get_module_image().get_delay_imports().get_libraries()) {
-            target_module->get_module_image().get_imports().add_library(item.convert_to_imported_library());
+            target_module->get_module_image().get_imports().add_library(item.convert_to_pe_import_library());
         }
     }
 
